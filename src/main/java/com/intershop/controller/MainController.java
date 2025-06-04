@@ -36,7 +36,7 @@ public class MainController {
                            @RequestParam(name = "pageNumber", defaultValue = "1") int pageNumber) {
 
         Pageable pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.by(sort.getSortColumnName()));
-        ItemPageDto itemPageDto = itemService.findAll(search, pageable);
+        ItemPageDto itemPageDto = itemService.findByTitle(search, pageable);
 
         int colCount = 2;
         List<List<ItemDto>> itemsByRows = new ArrayList<>();

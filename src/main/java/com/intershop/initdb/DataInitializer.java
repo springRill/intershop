@@ -5,6 +5,7 @@ import com.intershop.repository.ItemRepository;
 import com.intershop.service.ImageService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -16,6 +17,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 @Component
+@Profile("!test")
 public class DataInitializer implements CommandLineRunner {
 
     ItemRepository itemRepository;

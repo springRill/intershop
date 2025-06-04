@@ -26,7 +26,7 @@ public class ItemService {
         this.cartRepository = cartRepository;
     }
 
-    public ItemPageDto findAll(String search, Pageable pageable) {
+    public ItemPageDto findByTitle(String search, Pageable pageable) {
         Page<Item> itemListPage = itemRepository.findByTitleContaining(search, pageable);
 
         PagingDto pagingDto = new PagingDto();
@@ -60,7 +60,7 @@ public class ItemService {
         }).toList();
     }
 
-    public ItemDto findById(Long id) {
+    public ItemDto findByItemId(Long id) {
         ItemDto itemDto = itemRepository.findById(id).map(ItemMapper::toItemDto).orElseThrow();
         List<Cart> cartList = cartRepository.findByItemIdAndOrderIdIsNull(itemDto.getId());
         if (!cartList.isEmpty()) {

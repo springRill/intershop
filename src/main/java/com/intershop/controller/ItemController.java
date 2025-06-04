@@ -24,7 +24,7 @@ public class ItemController {
 
     @GetMapping("/{id}")
     public String getItems(Model model, @PathVariable(name = "id") Long id) {
-        model.addAttribute("item", itemService.findById(id));
+        model.addAttribute("item", itemService.findByItemId(id));
         return "item";
     }
 
