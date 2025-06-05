@@ -27,19 +27,40 @@ public class OrderService {
     }
 
     public OrdersDto getOrder(Long id) {
-        OrdersDto ordersDto = ordersRepository.findById(id).map(OrderMapper::toOrdersDto).orElseThrow();
-        List<ItemDto> itemDtoList = cartRepository.findByOrderId(ordersDto.getId()).stream().map(cart -> {
-            ItemDto itemDto = itemRepository.findById(cart.getItemId()).map(ItemMapper::toItemDto).orElseThrow();
-            itemDto.setCount(cart.getCount());
-            return itemDto;
-        }).toList();
-        ordersDto.setItems(itemDtoList);
-        Double totalSum = itemDtoList.stream().mapToDouble(itemDto -> itemDto.getCount() * itemDto.getPrice()).sum();
-        ordersDto.setTotalSum(totalSum);
-        return ordersDto;
+        OrdersDto ordersDtoFilled = ordersRepository.findById(id).map(orders -> {
+            OrdersDto ordersDto = OrderMapper.toOrdersDto(orders);
+
+            List<ItemDto> itemDtoList = orders.getCartList().stream().map(cart -> {
+                ItemDto itemDto = ItemMapper.toItemDto(cart.getItem());
+                itemDto.setCount(cart.getCount());
+                return itemDto;
+            }).toList();
+            ordersDto.setItems(itemDtoList);
+
+            Double totalSum = itemDtoList.stream().mapToDouble(itemDto -> itemDto.getCount() * itemDto.getPrice()).sum();
+            ordersDto.setTotalSum(totalSum);
+
+            return ordersDto;
+        }).orElseThrow();
+
+        return ordersDtoFilled;
     }
 
     public List<OrdersDto> getOrders() {
-        return ordersRepository.findAll().stream().map(orders -> getOrder(orders.getId())).toList();
+        return ordersRepository.findAll().stream().map(orders -> {
+            OrdersDto ordersDto = OrderMapper.toOrdersDto(orders);
+
+            List<ItemDto> itemDtoList = orders.getCartList().stream().map(cart -> {
+                ItemDto itemDto = ItemMapper.toItemDto(cart.getItem());
+                itemDto.setCount(cart.getCount());
+                return itemDto;
+            }).toList();
+            ordersDto.setItems(itemDtoList);
+
+            Double totalSum = itemDtoList.stream().mapToDouble(itemDto -> itemDto.getCount() * itemDto.getPrice()).sum();
+            ordersDto.setTotalSum(totalSum);
+
+            return ordersDto;
+        }).toList();
     }
 }

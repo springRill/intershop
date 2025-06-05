@@ -54,7 +54,7 @@ public class ItemService {
 
     public List<ItemDto> getCartItems() {
         return cartRepository.findByOrderIdIsNull().stream().map(cart -> {
-            ItemDto itemDto = itemRepository.findById(cart.getItemId()).map(ItemMapper::toItemDto).orElseThrow();
+            ItemDto itemDto = itemRepository.findById(cart.getItem().getId()).map(ItemMapper::toItemDto).orElseThrow();
             itemDto.setCount(cart.getCount());
             return itemDto;
         }).toList();

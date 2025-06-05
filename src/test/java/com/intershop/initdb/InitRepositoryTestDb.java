@@ -35,14 +35,14 @@ public class InitRepositoryTestDb {
         order_1 = testEntityManager.persist(order_1);
 
         Cart cart_1 = new Cart();
-        cart_1.setItemId(item_1.getId());
+        cart_1.setItem(item_1);
         cart_1.setCount(1);
-        cart_1.setOrderId(order_1.getId());
+        cart_1.setOrder(order_1);
         testEntityManager.persist(cart_1);
 
 
         Cart cart_2 = new Cart();
-        cart_2.setItemId(item_2.getId());
+        cart_2.setItem(item_2);
         cart_2.setCount(2);
         testEntityManager.persist(cart_2);
 

@@ -20,11 +20,11 @@ public class BuyService {
 
     @Transactional
     public Long buyCart(){
-        Long orderId = ordersRepository.save(new Orders()).getId();
+        Orders order = ordersRepository.save(new Orders());
         cartRepository.findByOrderIdIsNull().forEach(cart -> {
-            cart.setOrderId(orderId);
+            cart.setOrder(order);
             cartRepository.save(cart);
         });
-        return orderId;
+        return order.getId();
     }
 }

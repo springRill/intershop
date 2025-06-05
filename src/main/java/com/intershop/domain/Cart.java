@@ -9,9 +9,16 @@ public class Cart {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
-    Long itemId;
-    Integer count = 0;
-    Long orderId;
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "item_id")
+    private Item item;
+
+    private Integer count = 0;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
+    @JoinColumn(name = "order_id")
+    private Orders order;
 
 }

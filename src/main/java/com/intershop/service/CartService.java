@@ -1,6 +1,7 @@
 package com.intershop.service;
 
 import com.intershop.domain.Cart;
+import com.intershop.domain.Item;
 import com.intershop.dto.ItemActionEnum;
 import com.intershop.repository.CartRepository;
 import org.springframework.stereotype.Service;
@@ -21,7 +22,7 @@ public class CartService {
         Cart cart;
         if(cartList.isEmpty()){
             cart = new Cart();
-            cart.setItemId(itemId);
+            cart.setItem(new Item(itemId));
         }else{
             cart = cartList.getFirst();
         }

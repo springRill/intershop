@@ -24,7 +24,7 @@ public class DataInitializer implements CommandLineRunner {
 
     ImageService imageService;
 
-    @Value("${image.path:items}")
+    @Value("${items.path:items}")
     private String itemsDirectory;
 
     public DataInitializer(ItemRepository itemRepository, ImageService imageService) {
