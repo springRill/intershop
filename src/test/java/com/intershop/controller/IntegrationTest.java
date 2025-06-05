@@ -3,7 +3,7 @@ package com.intershop.controller;
 import com.intershop.dto.ItemActionEnum;
 import com.intershop.repository.CartRepository;
 import com.intershop.repository.OrdersRepository;
-import com.intershop.service.InitServiceTest;
+import com.intershop.initdb.InitTestDb;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -16,13 +16,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc
-public class IntegrationTest extends InitServiceTest {
+public class IntegrationTest extends InitTestDb {
 
     @Autowired
-    CartRepository cartRepository;
+    private CartRepository cartRepository;
 
     @Autowired
-    OrdersRepository ordersRepository;
+    private OrdersRepository ordersRepository;
 
     @Autowired
     private MockMvc mockMvc;

@@ -2,15 +2,16 @@ package com.intershop.service;
 
 import com.intershop.domain.Cart;
 import com.intershop.dto.ItemActionEnum;
+import com.intershop.initdb.InitTestDb;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class CartServiceTest extends InitServiceTest {
+class CartServiceTest extends InitTestDb {
 
     @Autowired
-    CartService cartService;
+    private CartService cartService;
 
     @Test
     void changeCartItem() {

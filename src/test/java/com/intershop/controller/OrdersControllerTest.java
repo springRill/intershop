@@ -16,7 +16,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class OrdersControllerTest {
 
     @MockitoBean
-    OrderService orderService;
+    private OrderService orderService;
 
     @Autowired
     private MockMvc mockMvc;

@@ -1,28 +1,15 @@
 package com.intershop.service;
 
-import com.intershop.domain.Cart;
-import com.intershop.domain.Item;
-import com.intershop.domain.Orders;
-import jakarta.persistence.EntityManager;
-import jakarta.transaction.Transactional;
-import org.junit.jupiter.api.BeforeEach;
+import com.intershop.initdb.InitTestDb;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.ActiveProfiles;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/*
-@SpringBootTest
-@ActiveProfiles("test")
-@Transactional
-*/
-class ItemServiceTest extends InitServiceTest {
+class ItemServiceTest extends InitTestDb {
 
     @Autowired
-    ItemService itemService;
+    private ItemService itemService;
 
     @Test
     void findByTitle() {

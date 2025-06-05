@@ -16,7 +16,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class BuyControllerTest {
 
     @MockitoBean
-    BuyService buyService;
+    private BuyService buyService;
 
     @Autowired
     private MockMvc mockMvc;

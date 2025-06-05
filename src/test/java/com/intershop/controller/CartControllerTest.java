@@ -17,10 +17,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class CartControllerTest {
 
     @MockitoBean
-    ItemService itemService;
+    private ItemService itemService;
 
     @MockitoBean
-    CartService cartService;
+    private CartService cartService;
 
     @Autowired
     private MockMvc mockMvc;

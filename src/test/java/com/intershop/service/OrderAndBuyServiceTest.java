@@ -1,17 +1,18 @@
 package com.intershop.service;
 
+import com.intershop.initdb.InitTestDb;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class OrderAndBuyServiceTest extends InitServiceTest {
+class OrderAndBuyServiceTest extends InitTestDb {
 
     @Autowired
-    OrderService orderService;
+    private OrderService orderService;
 
     @Autowired
-    BuyService buyService;
+    private BuyService buyService;
 
     @Test
     void buyAndOrder() {

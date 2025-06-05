@@ -1,12 +1,13 @@
 package com.intershop.repository;
 
 import com.intershop.domain.Cart;
+import com.intershop.initdb.InitRepositoryTestDb;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class CartRepositoryTest extends InitRepositoryTest {
+class CartRepositoryTest extends InitRepositoryTestDb {
 
     @Autowired
     private CartRepository cartRepository;
