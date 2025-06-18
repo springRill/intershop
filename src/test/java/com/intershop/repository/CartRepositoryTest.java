@@ -1,34 +1,40 @@
 package com.intershop.repository;
 
-import com.intershop.domain.Cart;
-import com.intershop.initdb.InitRepositoryTestDb;
+import com.intershop.initdb.InitTestDb;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.data.r2dbc.DataR2dbcTest;
+import org.springframework.data.domain.Sort;
+import reactor.test.StepVerifier;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-class CartRepositoryTest extends InitRepositoryTestDb {
+@DataR2dbcTest
+class CartRepositoryTest extends InitTestDb {
 
     @Autowired
     private CartRepository cartRepository;
 
     @Test
     void findByOrderIdIsNull() {
-        assertEquals(1, cartRepository.findByOrderIdIsNull().size());
+        StepVerifier.create(cartRepository.findByOrderIdIsNull(Sort.by(Sort.Direction.ASC, "id")))
+                .expectNextCount(1)
+                .verifyComplete();
     }
 
     @Test
     void findByItemIdAndOrderIdIsNull() {
-        Cart cartWithNullOrder = cartRepository.findAll().stream().filter(cart -> cart.getOrder() == null).findFirst().orElseThrow();
-        assertEquals(1, cartRepository.findByItemIdAndOrderIdIsNull(cartWithNullOrder.getItem().getId()).size());
+        StepVerifier.create(cartRepository.findByItemIdAndOrderIdIsNull(1L))
+                .expectNextCount(0)
+                .verifyComplete();
 
-        Cart cartWithNotNullOrder = cartRepository.findAll().stream().filter(cart -> cart.getOrder() != null).findFirst().orElseThrow();
-        assertEquals(0, cartRepository.findByItemIdAndOrderIdIsNull(cartWithNotNullOrder.getItem().getId()).size());
+        StepVerifier.create(cartRepository.findByItemIdAndOrderIdIsNull(2L))
+                .expectNextCount(1)
+                .verifyComplete();
     }
 
     @Test
     void findByOrderId() {
-        Cart cartWithOrderId = cartRepository.findAll().stream().filter(cart -> cart.getOrder()!=null).findFirst().orElseThrow();
-        assertEquals(1, cartRepository.findByOrderId(cartWithOrderId.getOrder().getId()).size());
+        StepVerifier.create(cartRepository.findByOrderId(1L))
+                .expectNextCount(1)
+                .verifyComplete();
     }
 }

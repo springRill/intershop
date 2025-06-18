@@ -8,17 +8,17 @@ import com.intershop.repository.CartRepository;
 import com.intershop.repository.ItemRepository;
 import com.intershop.repository.OrdersRepository;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @Service
 public class OrderService {
 
-    OrdersRepository ordersRepository;
+    private final OrdersRepository ordersRepository;
 
-    CartRepository cartRepository;
+    private final CartRepository cartRepository;
 
-    ItemRepository itemRepository;
+    private final ItemRepository itemRepository;
 
     public OrderService(OrdersRepository ordersRepository, CartRepository cartRepository, ItemRepository itemRepository) {
         this.ordersRepository = ordersRepository;
@@ -26,41 +26,59 @@ public class OrderService {
         this.itemRepository = itemRepository;
     }
 
-    public OrdersDto getOrder(Long id) {
-        OrdersDto ordersDtoFilled = ordersRepository.findById(id).map(orders -> {
-            OrdersDto ordersDto = OrderMapper.toOrdersDto(orders);
+    public Mono<OrdersDto> getOrder(Long id) {
+        return ordersRepository.findById(id)
+                .switchIfEmpty(Mono.error(new Exception("Order not found")))
+                .flatMap(order ->
+                        cartRepository.findByOrderId(order.getId()) // Flux<Cart>
+                                .flatMap(cart ->
+                                        itemRepository.findById(cart.getItemId())
+                                                .map(item -> {
+                                                    ItemDto itemDto = ItemMapper.toItemDto(item);
+                                                    itemDto.setCount(cart.getCount());
+                                                    return itemDto;
+                                                })
+                                )
+                                .collectList()
+                                .map(itemDtoList -> {
+                                    OrdersDto ordersDto = OrderMapper.toOrdersDto(order);
+                                    ordersDto.setItems(itemDtoList);
 
-            List<ItemDto> itemDtoList = orders.getCartList().stream().map(cart -> {
-                ItemDto itemDto = ItemMapper.toItemDto(cart.getItem());
-                itemDto.setCount(cart.getCount());
-                return itemDto;
-            }).toList();
-            ordersDto.setItems(itemDtoList);
+                                    double totalSum = itemDtoList.stream()
+                                            .mapToDouble(dto -> dto.getPrice() * dto.getCount())
+                                            .sum();
+                                    ordersDto.setTotalSum(totalSum);
 
-            Double totalSum = itemDtoList.stream().mapToDouble(itemDto -> itemDto.getCount() * itemDto.getPrice()).sum();
-            ordersDto.setTotalSum(totalSum);
-
-            return ordersDto;
-        }).orElseThrow();
-
-        return ordersDtoFilled;
+                                    return ordersDto;
+                                })
+                );
     }
 
-    public List<OrdersDto> getOrders() {
-        return ordersRepository.findAll().stream().map(orders -> {
-            OrdersDto ordersDto = OrderMapper.toOrdersDto(orders);
+    public Flux<OrdersDto> getOrders() {
+        return ordersRepository.findAll()
+                .flatMap(order ->
+                        cartRepository.findByOrderId(order.getId())
+                                .flatMap(cart ->
+                                        itemRepository.findById(cart.getItemId())
+                                                .map(item -> {
+                                                    ItemDto itemDto = ItemMapper.toItemDto(item);
+                                                    itemDto.setCount(cart.getCount());
+                                                    return itemDto;
+                                                })
+                                )
+                                .collectList()
+                                .map(itemDtoList -> {
+                                    OrdersDto ordersDto = OrderMapper.toOrdersDto(order);
+                                    ordersDto.setItems(itemDtoList);
 
-            List<ItemDto> itemDtoList = orders.getCartList().stream().map(cart -> {
-                ItemDto itemDto = ItemMapper.toItemDto(cart.getItem());
-                itemDto.setCount(cart.getCount());
-                return itemDto;
-            }).toList();
-            ordersDto.setItems(itemDtoList);
+                                    double totalSum = itemDtoList.stream()
+                                            .mapToDouble(dto -> dto.getCount() * dto.getPrice())
+                                            .sum();
+                                    ordersDto.setTotalSum(totalSum);
 
-            Double totalSum = itemDtoList.stream().mapToDouble(itemDto -> itemDto.getCount() * itemDto.getPrice()).sum();
-            ordersDto.setTotalSum(totalSum);
-
-            return ordersDto;
-        }).toList();
+                                    return ordersDto;
+                                })
+                );
     }
+
 }

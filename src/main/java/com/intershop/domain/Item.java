@@ -1,19 +1,16 @@
 package com.intershop.domain;
 
-import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Table;
 
-import java.util.ArrayList;
-import java.util.List;
-
-@Entity
 @Data
 @NoArgsConstructor
+@Table("item")
 public class Item {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String title;
@@ -27,8 +24,5 @@ public class Item {
     public Item(Long id) {
         this.id = id;
     }
-
-    @OneToMany(mappedBy = "item", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = false)
-    private List<Cart> cartList = new ArrayList<>();
 
 }

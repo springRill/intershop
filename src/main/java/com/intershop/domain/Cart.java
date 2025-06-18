@@ -1,24 +1,24 @@
 package com.intershop.domain;
 
-import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Table;
 
-@Entity
 @Data
+@Table("cart")
+@AllArgsConstructor
+@NoArgsConstructor
 public class Cart {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "item_id")
-    private Item item;
+    private Long itemId;
 
     private Integer count = 0;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = true)
-    @JoinColumn(name = "order_id")
-    private Orders order;
+    private Long orderId;
 
 }

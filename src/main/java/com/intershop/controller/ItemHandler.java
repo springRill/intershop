@@ -1,0 +1,45 @@
+package com.intershop.controller;
+
+import com.intershop.dto.ItemActionEnum;
+import com.intershop.service.CartService;
+import com.intershop.service.ItemService;
+import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.server.ServerRequest;
+import org.springframework.web.reactive.function.server.ServerResponse;
+import reactor.core.publisher.Mono;
+
+import java.net.URI;
+import java.util.Map;
+
+@Component
+public class ItemHandler {
+
+    ItemService itemService;
+
+    CartService cartService;
+
+    public ItemHandler(ItemService itemService, CartService cartService) {
+        this.itemService = itemService;
+        this.cartService = cartService;
+    }
+
+    public Mono<ServerResponse> getItems(ServerRequest request) {
+        Long id = Long.valueOf(request.pathVariable("id"));
+        return itemService.findByItemId(id).flatMap(itemDto -> {
+            return ServerResponse.ok().render("item", Map.of(
+                    "item", itemDto
+            ));
+        });
+    }
+
+    public Mono<ServerResponse> changeCartItem(ServerRequest request) {
+        Long id = Long.valueOf(request.pathVariable("id"));
+        return request.formData()
+                .map(data -> data.getFirst("action"))
+                .map(ItemActionEnum::valueOf)
+                .flatMap(action -> cartService.changeCartItem(id, action))
+                .then(ServerResponse.seeOther(URI.create("/items/%d".formatted(id))).build());
+
+    }
+
+}

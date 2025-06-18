@@ -1,16 +1,16 @@
 package com.intershop.repository;
 
 import com.intershop.domain.Cart;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.r2dbc.repository.R2dbcRepository;
+import reactor.core.publisher.Flux;
 
-import java.util.List;
+public interface CartRepository extends R2dbcRepository<Cart, Long> {
 
-public interface CartRepository extends JpaRepository<Cart, Long> {
+    Flux<Cart> findByOrderIdIsNull(Sort sort);
 
-    List<Cart> findByOrderIdIsNull();
+    Flux<Cart> findByItemIdAndOrderIdIsNull(Long itemId);
 
-    List<Cart> findByItemIdAndOrderIdIsNull(Long itemId);
-
-    List<Cart> findByOrderId(Long orderId);
+    Flux<Cart> findByOrderId(Long orderId);
 
 }

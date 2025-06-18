@@ -1,21 +1,20 @@
 package com.intershop.controller;
 
+import com.intershop.domain.Cart;
 import com.intershop.dto.ItemActionEnum;
+import com.intershop.initdb.InitTestDb;
 import com.intershop.repository.CartRepository;
 import com.intershop.repository.OrdersRepository;
-import com.intershop.initdb.InitTestDb;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.web.reactive.function.BodyInserters;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@AutoConfigureMockMvc
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class IntegrationTest extends InitTestDb {
 
     @Autowired
@@ -25,52 +24,66 @@ public class IntegrationTest extends InitTestDb {
     private OrdersRepository ordersRepository;
 
     @Autowired
-    private MockMvc mockMvc;
+    private WebTestClient webTestClient;
 
     @Test
-    void buyControllerTest() throws Exception {
-        assertEquals(1, ordersRepository.findAll().size());
+    void buyIntegrationTest() {
+        int before = ordersRepository.findAll().collectList().block().size();
 
-        mockMvc.perform(post("/buy"))
-                .andExpect(status().is3xxRedirection());
+        webTestClient.post()
+                .uri("/buy")
+                .exchange()
+                .expectStatus().is3xxRedirection();
 
-        assertEquals(2, ordersRepository.findAll().size());
+        int after = ordersRepository.findAll().collectList().block().size();
+        assertEquals(before + 1, after);
     }
 
     @Test
-    void cartControllerTest() throws Exception {
-        assertEquals(2, cartRepository.findById(itemInCartId).orElseThrow().getCount());
+    void cartIntegrationTest() {
+        assertEquals(2, cartRepository.findById(itemInCartId).block().getCount());
 
-        mockMvc.perform(post("/cart/items/%d".formatted(itemInCartId))
-                        .param("action", ItemActionEnum.PLUS.name()))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/cart/items"));
+        webTestClient.post()
+                .uri("/cart/items/{id}", itemInCartId)
+                .bodyValue("action=PLUS")
+                .header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+                .exchange()
+                .expectStatus().is3xxRedirection()
+                .expectHeader().valueEquals("Location", "/cart/items");
 
-        assertEquals(3, cartRepository.findById(itemInCartId).orElseThrow().getCount());
+        assertEquals(3, cartRepository.findById(itemInCartId).block().getCount());
     }
 
     @Test
-    void itemControllerTest() throws Exception {
-        assertEquals(2, cartRepository.findById(itemInCartId).orElseThrow().getCount());
+    void itemIntegrationTest() {
+        int before = cartRepository.findById(itemInCartId).map(Cart::getCount).block();
+        assertEquals(2, before);
 
-        mockMvc.perform(post("/items/%d".formatted(itemInCartId))
-                        .param("action", ItemActionEnum.MINUS.name()))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/items/%d".formatted(itemInCartId)));
+        webTestClient.post()
+                .uri("/items/{id}", itemInCartId)
+                .body(BodyInserters.fromFormData("action", ItemActionEnum.MINUS.name()))
+                .exchange()
+                .expectStatus().is3xxRedirection()
+                .expectHeader().valueEquals("Location", "/items/%d".formatted(itemInCartId));
 
-        assertEquals(1, cartRepository.findById(itemInCartId).orElseThrow().getCount());
+        int after = cartRepository.findById(itemInCartId).map(Cart::getCount).block();
+        assertEquals(1, after);
     }
 
     @Test
-    void mainControllerTest() throws Exception {
-        assertEquals(2, cartRepository.findById(itemInCartId).orElseThrow().getCount());
+    void mainIntegrationTest() {
+        Integer before = cartRepository.findById(itemInCartId).map(Cart::getCount).block();
+        assertEquals(2, before);
 
-        mockMvc.perform(post("/main/items/%d".formatted(itemInCartId))
-                        .param("action", ItemActionEnum.DELETE.name()))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/main/items"));
+        webTestClient.post()
+                .uri("/main/items/{id}", itemInCartId)
+                .body(BodyInserters.fromFormData("action", ItemActionEnum.DELETE.name()))
+                .exchange()
+                .expectStatus().is3xxRedirection()
+                .expectHeader().valueEquals("Location", "/main/items");
 
-        assertThat(cartRepository.findById(itemInCartId)).isEmpty();
+        Cart cart = cartRepository.findById(itemInCartId).block();
+        assertNull(cart); // или:
     }
 
 }

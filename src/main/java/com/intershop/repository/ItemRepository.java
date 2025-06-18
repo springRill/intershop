@@ -1,14 +1,17 @@
 package com.intershop.repository;
 
 import com.intershop.domain.Item;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.r2dbc.repository.R2dbcRepository;
 import org.springframework.stereotype.Repository;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @Repository
-public interface ItemRepository extends JpaRepository<Item, Long> {
+public interface ItemRepository extends R2dbcRepository<Item, Long> {
 
-    Page<Item> findByTitleContaining(String pattern, Pageable pageable);
+    Mono<Long> countByTitleContaining(String pattern);
+
+    Flux<Item> findByTitleContaining(String pattern, Pageable pageable);
 
 }

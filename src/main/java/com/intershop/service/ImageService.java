@@ -5,6 +5,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Mono;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,17 +30,17 @@ public class ImageService {
         this.resourceLoader = resourceLoader;
     }
 
-    public Resource getImage(String filename) {
+    public Mono<Resource> getImage(String filename) {
         if (filename != null) {
             try {
                 Path filePath = Paths.get(imagePath).resolve(filename);
                 Resource resource = new UrlResource(filePath.toUri());
-                return resource;
+                return Mono.just(resource);
             } catch (MalformedURLException e) {
                 throw new RuntimeException(e);
             }
         }
-        return null;
+        return Mono.empty();
     }
 
     public Path uploadItemImage(Path source) throws IOException {

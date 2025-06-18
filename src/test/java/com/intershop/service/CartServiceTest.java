@@ -1,29 +1,50 @@
 package com.intershop.service;
 
-import com.intershop.domain.Cart;
 import com.intershop.dto.ItemActionEnum;
 import com.intershop.initdb.InitTestDb;
+import com.intershop.repository.CartRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import reactor.test.StepVerifier;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@SpringBootTest
 class CartServiceTest extends InitTestDb {
+
+    @Autowired
+    private CartRepository cartRepository;
 
     @Autowired
     private CartService cartService;
 
     @Test
     void changeCartItem() {
-        assertEquals(2, entityManager.find(Cart.class, cartId).getCount());
 
-        cartService.changeCartItem(itemInCartId, ItemActionEnum.PLUS);
-        assertEquals(3, entityManager.find(Cart.class, cartId).getCount());
+        StepVerifier.create(cartRepository.findById(cartId))
+                .assertNext(cart -> assertEquals(2, cart.getCount()))
+                .verifyComplete();
 
-        cartService.changeCartItem(itemInCartId, ItemActionEnum.MINUS);
-        assertEquals(2, entityManager.find(Cart.class, cartId).getCount());
+        StepVerifier.create(cartService.changeCartItem(itemInCartId, ItemActionEnum.PLUS))
+                .verifyComplete();
 
-        cartService.changeCartItem(itemInCartId, ItemActionEnum.DELETE);
-        assertNull(entityManager.find(Cart.class, cartId));
+        StepVerifier.create(cartRepository.findById(cartId))
+                .assertNext(cart -> assertEquals(3, cart.getCount()))
+                .verifyComplete();
+
+        StepVerifier.create(cartService.changeCartItem(itemInCartId, ItemActionEnum.MINUS))
+                .verifyComplete();
+
+        StepVerifier.create(cartRepository.findById(cartId))
+                .assertNext(cart -> assertEquals(2, cart.getCount()))
+                .verifyComplete();
+
+        StepVerifier.create(cartService.changeCartItem(itemInCartId, ItemActionEnum.DELETE))
+                .verifyComplete();
+
+        StepVerifier.create(cartRepository.findById(cartId))
+                .expectNextCount(0)
+                .verifyComplete();
     }
 }

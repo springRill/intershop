@@ -3,9 +3,14 @@ package com.intershop.service;
 import com.intershop.initdb.InitTestDb;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import reactor.test.StepVerifier;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@SpringBootTest
 class ItemServiceTest extends InitTestDb {
 
     @Autowired
@@ -13,18 +18,32 @@ class ItemServiceTest extends InitTestDb {
 
     @Test
     void findByTitle() {
-        assertEquals(2, itemService.findByTitle("item", null).getItemDtoList().size());
-        assertEquals(1, itemService.findByTitle("item_1 title", null).getItemDtoList().size());
-        assertEquals(1, itemService.findByTitle("item_2 title", null).getItemDtoList().size());
+        Pageable pageable = PageRequest.of(0, 10);
+
+        StepVerifier.create(itemService.findByTitle("item", pageable))
+                .assertNext(itemPageDto -> assertEquals(2, itemPageDto.getItemDtoList().size()))
+                .verifyComplete();
+
+        StepVerifier.create(itemService.findByTitle("item_1 title", pageable))
+                .assertNext(itemPageDto -> assertEquals(1, itemPageDto.getItemDtoList().size()))
+                .verifyComplete();
+
+        StepVerifier.create(itemService.findByTitle("item_2 title", pageable))
+                .assertNext(itemPageDto -> assertEquals(1, itemPageDto.getItemDtoList().size()))
+                .verifyComplete();
     }
 
     @Test
     void getCartItems() {
-        assertEquals(1, itemService.getCartItems().size());
+        StepVerifier.create(itemService.getCartItems())
+                .expectNextCount(1)
+                .verifyComplete();
     }
 
     @Test
     void findByItemId() {
-        assertEquals(2, itemService.findByItemId(itemInCartId).getCount());
+        StepVerifier.create(itemService.findByItemId(itemInCartId))
+                .assertNext(itemDto -> assertEquals(2, itemDto.getCount()))
+                .verifyComplete();
     }
 }

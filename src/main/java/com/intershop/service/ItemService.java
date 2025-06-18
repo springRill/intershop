@@ -1,73 +1,96 @@
 package com.intershop.service;
 
 import com.intershop.domain.Cart;
-import com.intershop.domain.Item;
 import com.intershop.dto.ItemDto;
 import com.intershop.dto.ItemPageDto;
 import com.intershop.dto.PagingDto;
 import com.intershop.mapper.ItemMapper;
 import com.intershop.repository.CartRepository;
 import com.intershop.repository.ItemRepository;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 
 @Service
 public class ItemService {
 
-    ItemRepository itemRepository;
+    private final ItemRepository itemRepository;
 
-    CartRepository cartRepository;
+    private final CartRepository cartRepository;
 
     public ItemService(ItemRepository itemRepository, CartRepository cartRepository) {
         this.itemRepository = itemRepository;
         this.cartRepository = cartRepository;
     }
 
-    public ItemPageDto findByTitle(String search, Pageable pageable) {
-        Page<Item> itemListPage = itemRepository.findByTitleContaining(search, pageable);
+    public Mono<ItemPageDto> findByTitle(String search, Pageable pageable) {
+        Mono<Long> totalCountMono = itemRepository.countByTitleContaining(search);
 
-        PagingDto pagingDto = new PagingDto();
-        pagingDto.setPageSize(itemListPage.getSize());
-        pagingDto.setHasPrevious(itemListPage.hasPrevious());
-        pagingDto.setHasNext(itemListPage.hasNext());
-        pagingDto.setPageNumber(itemListPage.getNumber() + 1);
+        Flux<ItemDto> itemDtoFlux = itemRepository.findByTitleContaining(search, pageable)
+                .concatMap(item -> {
+                    System.out.println("item = " + item.toString());
+                    ItemDto dto = ItemMapper.toItemDto(item);
+                    dto.setCount(0);
+                    return cartRepository.findByItemIdAndOrderIdIsNull(item.getId())
+                            .next()
+                            .map(cart -> {
+                                dto.setCount(cart.getCount());
+                                return dto;
+                            })
+                            .defaultIfEmpty(dto);
+                });
 
-        List<ItemDto> itemDtoList = itemListPage.stream().map(ItemMapper::toItemDto).toList();
-        itemDtoList.forEach(itemDto -> {
-            List<Cart> cartList = cartRepository.findByItemIdAndOrderIdIsNull(itemDto.getId());
-            if (!cartList.isEmpty()) {
-                itemDto.setCount(cartList.getFirst().getCount());
-            } else {
-                itemDto.setCount(0);
-            }
-        });
+        Mono<List<ItemDto>> itemDtoListMono = itemDtoFlux
+                .collectList();
 
-        ItemPageDto itemPageDto = new ItemPageDto();
-        itemPageDto.setItemDtoList(itemDtoList);
-        itemPageDto.setPagingDto(pagingDto);
+        return Mono.zip(itemDtoListMono, totalCountMono)
+                .map(tuple -> {
+                    List<ItemDto> itemDtoList = tuple.getT1();
+                    long totalCount = tuple.getT2();
 
-        return itemPageDto;
+                    PagingDto pagingDto = new PagingDto();
+                    pagingDto.setPageSize(pageable.getPageSize());
+                    pagingDto.setPageNumber(pageable.getPageNumber() + 1);
+                    pagingDto.setHasPrevious(pageable.getPageNumber() > 0);
+                    pagingDto.setHasNext((pageable.getPageNumber() + 1) * pageable.getPageSize() < totalCount);
+
+                    ItemPageDto itemPageDto = new ItemPageDto();
+                    itemPageDto.setItemDtoList(itemDtoList);
+                    itemPageDto.setPagingDto(pagingDto);
+
+                    return itemPageDto;
+                });
     }
 
-    public List<ItemDto> getCartItems() {
-        return cartRepository.findByOrderIdIsNull().stream().map(cart -> {
-            ItemDto itemDto = itemRepository.findById(cart.getItem().getId()).map(ItemMapper::toItemDto).orElseThrow();
-            itemDto.setCount(cart.getCount());
-            return itemDto;
-        }).toList();
+    public Flux<ItemDto> getCartItems() {
+        return cartRepository.findByOrderIdIsNull(Sort.by(Sort.Direction.ASC, "id"))
+                .concatMap(cart ->
+                        itemRepository.findById(cart.getItemId())
+                                .map(ItemMapper::toItemDto)
+                                .map(dto -> {
+                                    dto.setCount(cart.getCount());
+                                    return dto;
+                                })
+                );
     }
 
-    public ItemDto findByItemId(Long id) {
-        ItemDto itemDto = itemRepository.findById(id).map(ItemMapper::toItemDto).orElseThrow();
-        List<Cart> cartList = cartRepository.findByItemIdAndOrderIdIsNull(itemDto.getId());
-        if (!cartList.isEmpty()) {
-            itemDto.setCount(cartList.getFirst().getCount());
-        } else {
-            itemDto.setCount(0);
-        }
-        return itemDto;
+    public Mono<ItemDto> findByItemId(Long id) {
+        return itemRepository.findById(id)
+                .switchIfEmpty(Mono.error(new RuntimeException("Item not found")))
+                .flatMap(item ->
+                        cartRepository.findByItemIdAndOrderIdIsNull(item.getId())
+                                .next()
+                                .defaultIfEmpty(new Cart())
+                                .map(cart -> {
+                                    ItemDto dto = ItemMapper.toItemDto(item);
+                                    dto.setCount(cart.getCount() != null ? cart.getCount() : 0);
+                                    return dto;
+                                })
+                );
     }
+
 }

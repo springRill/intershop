@@ -3,37 +3,50 @@ package com.intershop.initdb;
 import com.intershop.domain.Item;
 import com.intershop.repository.ItemRepository;
 import com.intershop.service.ImageService;
+import io.r2dbc.spi.ConnectionFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.r2dbc.core.DatabaseClient;
 import org.springframework.stereotype.Component;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Component
 @Profile("!test")
 public class DataInitializer implements CommandLineRunner {
 
-    ItemRepository itemRepository;
+    private final ItemRepository itemRepository;
 
-    ImageService imageService;
+    private final ImageService imageService;
+
+    private final ConnectionFactory connectionFactory;
+
 
     @Value("${items.path:items}")
     private String itemsDirectory;
 
-    public DataInitializer(ItemRepository itemRepository, ImageService imageService) {
+    public DataInitializer(ItemRepository itemRepository, ImageService imageService, ConnectionFactory connectionFactory) {
         this.itemRepository = itemRepository;
         this.imageService = imageService;
+        this.connectionFactory = connectionFactory;
     }
 
     @Override
     public void run(String... args) throws Exception {
+        executeSqlFromFile("schema.sql");
+
         Path rootDir = Paths.get(itemsDirectory);
 
         List<Path> sourceItemFolders = Files.list(rootDir)
@@ -57,10 +70,28 @@ public class DataInitializer implements CommandLineRunner {
                 item.setImgPath(targetImagePath.getFileName().toString());
                 item.setPrice(Double.valueOf(lines.get(2)));
 
-                itemRepository.save(item);
+                itemRepository.save(item).block();
             }
         }
 
+    }
+
+    private void executeSqlFromFile(String filename) throws Exception {
+        String sql;
+        try (BufferedReader reader = new BufferedReader(
+                new InputStreamReader(new ClassPathResource(filename).getInputStream(), StandardCharsets.UTF_8))) {
+            sql = reader.lines().collect(Collectors.joining("\n"));
+        }
+
+        for (String statement : sql.split(";")) {
+            String trimmed = statement.trim();
+            if (!trimmed.isEmpty()) {
+                DatabaseClient.create(connectionFactory)
+                        .sql(trimmed)
+                        .then()
+                        .block();
+            }
+        }
     }
 
     private Path getImagePath(Path itemPath) throws IOException {
