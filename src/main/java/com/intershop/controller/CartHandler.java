@@ -16,9 +16,9 @@ import java.util.Map;
 @Component
 public class CartHandler {
 
-    ItemService itemService;
+    private final ItemService itemService;
 
-    CartService cartService;
+    private final CartService cartService;
 
     public CartHandler(ItemService itemService, CartService cartService) {
         this.itemService = itemService;

@@ -21,9 +21,9 @@ import java.util.Map;
 @Component
 public class MainHandler {
 
-    ItemService itemService;
+    private final ItemService itemService;
 
-    CartService cartService;
+    private final CartService cartService;
 
     public MainHandler(ItemService itemService, CartService cartService) {
         this.itemService = itemService;

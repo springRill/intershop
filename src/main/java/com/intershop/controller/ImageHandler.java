@@ -10,7 +10,7 @@ import reactor.core.publisher.Mono;
 @Component
 public class ImageHandler {
 
-    ImageService imageService;
+    private final ImageService imageService;
 
     public ImageHandler(ImageService imageService) {
         this.imageService = imageService;

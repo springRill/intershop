@@ -32,7 +32,6 @@ public class ItemService {
 
         Flux<ItemDto> itemDtoFlux = itemRepository.findByTitleContaining(search, pageable)
                 .concatMap(item -> {
-                    System.out.println("item = " + item.toString());
                     ItemDto dto = ItemMapper.toItemDto(item);
                     dto.setCount(0);
                     return cartRepository.findByItemIdAndOrderIdIsNull(item.getId())

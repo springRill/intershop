@@ -6,7 +6,7 @@ VALUES
 INSERT INTO orders(id)
 VALUES (1);
 
-SELECT setval(pg_get_serial_sequence('orders', 'id'), 1, true);
+ALTER TABLE orders ALTER COLUMN id RESTART WITH 2;
 
 INSERT INTO cart(id, item_id, count, order_id)
 VALUES

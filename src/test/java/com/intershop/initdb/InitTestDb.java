@@ -22,9 +22,6 @@ public class InitTestDb {
     @Autowired
     private DatabaseClient databaseClient;
 
-    @Autowired
-    private ConnectionFactory connectionFactory;
-
     @BeforeEach
     void setupSchemaAndData() throws Exception {
         executeSqlFromFile("schema.sql");
@@ -41,12 +38,18 @@ public class InitTestDb {
         for (String statement : sql.split(";")) {
             String trimmed = statement.trim();
             if (!trimmed.isEmpty()) {
-                DatabaseClient.create(connectionFactory)
+                databaseClient
                         .sql(trimmed)
                         .then()
                         .block();
             }
         }
     }
+/*
+                DatabaseClient.create(connectionFactory)
+                        .sql(trimmed)
+                        .then()
+                        .block();
 
+*/
 }

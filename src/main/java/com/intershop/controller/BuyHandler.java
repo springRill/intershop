@@ -11,7 +11,7 @@ import java.net.URI;
 @Component
 public class BuyHandler {
 
-    BuyService buyService;
+    private final BuyService buyService;
 
     public BuyHandler(BuyService buyService) {
         this.buyService = buyService;

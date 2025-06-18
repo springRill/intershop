@@ -11,7 +11,7 @@ import java.util.Map;
 @Component
 public class OrdersHandler {
 
-    OrderService orderService;
+    private final OrderService orderService;
 
     public OrdersHandler(OrderService orderService) {
         this.orderService = orderService;
