@@ -1,6 +1,5 @@
 package com.intershop.initdb;
 
-import io.r2dbc.spi.ConnectionFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
@@ -45,11 +44,4 @@ public class InitTestDb {
             }
         }
     }
-/*
-                DatabaseClient.create(connectionFactory)
-                        .sql(trimmed)
-                        .then()
-                        .block();
-
-*/
 }

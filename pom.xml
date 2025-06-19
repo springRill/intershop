@@ -8,10 +8,10 @@
 		<version>3.5.0</version>
 	</parent>
 	<groupId>com</groupId>
-	<artifactId>intershop</artifactId>
+	<artifactId>intershop-reactive</artifactId>
 	<version>0.0.1</version>
-	<name>intershop</name>
-	<description>intershop</description>
+	<name>intershop-reactive</name>
+	<description>intershop-reactive</description>
 
 	<properties>
 		<java.version>21</java.version>
@@ -30,11 +30,13 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-thymeleaf</artifactId>
 		</dependency>
+<!--
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>r2dbc-postgresql</artifactId>
 			<scope>runtime</scope>
 		</dependency>
+-->
 		<dependency>
 			<groupId>io.r2dbc</groupId>
 			<artifactId>r2dbc-h2</artifactId>

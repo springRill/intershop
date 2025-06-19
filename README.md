@@ -28,17 +28,17 @@
 
 ### Запуск из среды разработки
 
-Для запуска из среды разработки просто запускаем класс `IntershopApplication` 
+Для запуска из среды разработки просто запускаем класс `IntershopReactiveApplication` 
 
 ### Локальный запуск
 
-- Для локального запуска, слача нужно выполнить `package` в `maven`, чтобы собрался исполняемый файл `intershop-0.0.1.jar`.
+- Для локального запуска, слача нужно выполнить `package` в `maven`, чтобы собрался исполняемый файл `intershop-reactive-0.0.1.jar`.
 - Скопировать радом с исполняемым файлом набор товаров из проекта`items` или моздать свой.
-- запустить приложение `java -jar intershop-0.0.1.jar`
+- запустить приложение `java -jar intershop-reactive-0.0.1.jar`
 
 ### Запуск в Docker
 
-- Для запуска в Docker, слача нужно выполнить `package` в `maven`, чтобы собрался исполняемый файл `intershop-0.0.1.jar`.
-- Собрать образ `docker build -t intershop_image .`
-- Запустить контейнер `docker run -p 8080:8080 intershop_image`
+- Для запуска в Docker, слача нужно выполнить `package` в `maven`, чтобы собрался исполняемый файл `intershop-reactive-0.0.1.jar`.
+- Собрать образ `docker build -t intershop_reactive_image .`
+- Запустить контейнер `docker run -p 8080:8080 intershop_reactive_image`
 - после этого приложение будет доступно по адресу `http://localhost:8080/`
