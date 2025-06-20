@@ -1,5 +1,6 @@
 package com.intershop.controller;
 
+import com.intershop.configuration.RouterConfiguration;
 import com.intershop.dto.ItemActionEnum;
 import com.intershop.dto.ItemDto;
 import com.intershop.dto.ItemPageDto;
@@ -25,8 +26,26 @@ import static org.mockito.Mockito.when;
 
 
 @WebFluxTest(controllers = MainHandler.class)
-@Import(MainRouterConfiguration.class)
+@Import(RouterConfiguration.class)
 class MainHandlerTest {
+
+    @MockitoBean
+    private BuyHandler buyHandler;
+
+    @MockitoBean
+    private CartHandler cartHandler;
+
+    @MockitoBean
+    private ImageHandler imageHandler;
+
+    @MockitoBean
+    private DefaultHandler defaultHandler;
+
+    @MockitoBean
+    private ItemHandler itemHandler;
+
+    @MockitoBean
+    private OrdersHandler ordersHandler;
 
     @MockitoBean
     private ItemService itemService;

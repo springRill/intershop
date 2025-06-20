@@ -1,5 +1,6 @@
 package com.intershop.controller;
 
+import com.intershop.configuration.RouterConfiguration;
 import com.intershop.dto.OrdersDto;
 import com.intershop.service.OrderService;
 import org.junit.jupiter.api.Test;
@@ -18,8 +19,26 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 @WebFluxTest(controllers = OrdersHandler.class)
-@Import(OrdersRouterConfiguration.class)
+@Import(RouterConfiguration.class)
 class OrdersHandlerTest {
+
+    @MockitoBean
+    private BuyHandler buyHandler;
+
+    @MockitoBean
+    private CartHandler cartHandler;
+
+    @MockitoBean
+    private ImageHandler imageHandler;
+
+    @MockitoBean
+    private DefaultHandler defaultHandler;
+
+    @MockitoBean
+    private ItemHandler itemHandler;
+
+    @MockitoBean
+    private MainHandler mainHandler;
 
     @MockitoBean
     private OrderService orderService;
