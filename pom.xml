@@ -10,10 +10,15 @@
 	<groupId>com</groupId>
 	<artifactId>intershop-reactive</artifactId>
 	<version>0.0.1</version>
-	<name>intershop-reactive</name>
+    <packaging>pom</packaging>
+    <name>intershop-reactive</name>
 	<description>intershop-reactive</description>
+    <modules>
+        <module>services</module>
+		<module>showcase</module>
+	</modules>
 
-	<properties>
+    <properties>
 		<java.version>21</java.version>
 	</properties>
 
