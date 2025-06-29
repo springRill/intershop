@@ -3,9 +3,10 @@ package com.intershop.service;
 import com.intershop.domain.Orders;
 import com.intershop.repository.CartRepository;
 import com.intershop.repository.OrdersRepository;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.reactive.TransactionalOperator;
 import reactor.core.publisher.Mono;
 
 @Service
@@ -15,14 +16,15 @@ public class BuyService {
 
     private final OrdersRepository ordersRepository;
 
-    private final TransactionalOperator transactionalOperator;
-
-    public BuyService(CartRepository cartRepository, OrdersRepository ordersRepository, TransactionalOperator transactionalOperator) {
+    public BuyService(CartRepository cartRepository, OrdersRepository ordersRepository) {
         this.cartRepository = cartRepository;
         this.ordersRepository = ordersRepository;
-        this.transactionalOperator = transactionalOperator;
     }
 
+    @Caching(evict = {
+            @CacheEvict(value = "itemPages", allEntries = true),
+            @CacheEvict(value = "carts", allEntries = true)
+    })
     public Mono<Long> buyCart() {
         return ordersRepository.save(new Orders())
                 .flatMap(order ->

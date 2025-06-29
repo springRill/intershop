@@ -7,6 +7,7 @@ import com.intershop.dto.PagingDto;
 import com.intershop.mapper.ItemMapper;
 import com.intershop.repository.CartRepository;
 import com.intershop.repository.ItemRepository;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -27,7 +28,10 @@ public class ItemService {
         this.cartRepository = cartRepository;
     }
 
+    @Cacheable(value = "itemPages", key = "#search + '_' + #pageable")
     public Mono<ItemPageDto> findByTitle(String search, Pageable pageable) {
+        System.out.println("--- Вычисляю ItemPageDto для поиска: '" + search + "' и пагинации: " + pageable + " (не из кэша) ---");
+
         Mono<Long> totalCountMono = itemRepository.countByTitleContaining(search);
 
         Flux<ItemDto> itemDtoFlux = itemRepository.findByTitleContaining(search, pageable)
@@ -65,7 +69,9 @@ public class ItemService {
                 });
     }
 
+    @Cacheable(value = "carts", key = "'anonymousCart'")
     public Flux<ItemDto> getCartItems() {
+        System.out.println("--- Вычисляю ItemDto carts::anonymousCart (не из кэша) ---");
         return cartRepository.findByOrderIdIsNull(Sort.by(Sort.Direction.ASC, "id"))
                 .concatMap(cart ->
                         itemRepository.findById(cart.getItemId())
@@ -77,7 +83,9 @@ public class ItemService {
                 );
     }
 
+    @Cacheable(value = "items", key = "#id")
     public Mono<ItemDto> findByItemId(Long id) {
+        System.out.println("--- Вычисляю findByItemId: '" + id + " (не из кэша) ---");
         return itemRepository.findById(id)
                 .switchIfEmpty(Mono.error(new RuntimeException("Item not found")))
                 .flatMap(item ->

@@ -3,6 +3,8 @@ package com.intershop.service;
 import com.intershop.domain.Cart;
 import com.intershop.dto.ItemActionEnum;
 import com.intershop.repository.CartRepository;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
@@ -15,10 +17,14 @@ public class CartService {
         this.cartRepository = cartRepository;
     }
 
+    @Caching(evict = {
+            @CacheEvict(value = "itemPages", allEntries = true),
+            @CacheEvict(value = "carts", allEntries = true)
+    })
     public Mono<Void> changeCartItem(Long itemId, ItemActionEnum action) {
         return cartRepository.findByItemIdAndOrderIdIsNull(itemId)
-                .next() // берём первый элемент (если есть)
-                .defaultIfEmpty(new Cart(null, itemId, 0, null)) // если не найден — создаём новый Cart
+                .next()
+                .defaultIfEmpty(new Cart(null, itemId, 0, null))
                 .flatMap(cart -> {
                     Integer count = cart.getCount() == null ? 0 : cart.getCount();
 
