@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import reactor.test.StepVerifier;
 
 @SpringBootTest
@@ -15,6 +16,9 @@ class OrderAndBuyServiceTest extends InitTestDb {
 
     @Autowired
     private BuyService buyService;
+
+    @MockitoBean
+    private PaymentApiService paymentApiService;
 
     @Test
     void buyAndOrder() {

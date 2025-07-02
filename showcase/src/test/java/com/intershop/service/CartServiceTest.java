@@ -6,6 +6,7 @@ import com.intershop.repository.CartRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import reactor.test.StepVerifier;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -18,6 +19,9 @@ class CartServiceTest extends InitTestDb {
 
     @Autowired
     private CartService cartService;
+
+    @MockitoBean
+    private PaymentApiService paymentApiService;
 
     @Test
     void changeCartItem() {

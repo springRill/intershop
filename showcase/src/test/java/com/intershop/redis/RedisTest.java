@@ -4,6 +4,7 @@ import com.intershop.configuration.EmbeddedRedisConfiguration;
 import com.intershop.dto.ItemDto;
 import com.intershop.dto.ItemPageDto;
 import com.intershop.service.ItemService;
+import com.intershop.service.PaymentApiService;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
@@ -11,6 +12,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.util.List;
 
@@ -25,6 +27,9 @@ public class RedisTest {
 
     @SpyBean
     private ItemService itemService;
+
+    @MockitoBean
+    private PaymentApiService paymentApiService;
 
     @Test
     public void testFindByTitle() {
