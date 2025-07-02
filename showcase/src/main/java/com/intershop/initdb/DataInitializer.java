@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Component
-@Profile("!test")
+@Profile("!test & !redisTest")
 public class DataInitializer implements CommandLineRunner {
 
     private final ItemRepository itemRepository;

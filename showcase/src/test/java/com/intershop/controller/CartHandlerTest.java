@@ -4,6 +4,7 @@ import com.intershop.configuration.RouterConfiguration;
 import com.intershop.dto.ItemActionEnum;
 import com.intershop.service.CartService;
 import com.intershop.service.ItemService;
+import com.intershop.service.PaymentApiService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
@@ -47,12 +48,17 @@ class CartHandlerTest {
     @MockitoBean
     private CartService cartService;
 
+    @MockitoBean
+    private PaymentApiService paymentApiService;
+
     @Autowired
     private WebTestClient webTestClient;
 
     @Test
     void getCartItems() {
         when(itemService.getCartItems()).thenReturn(Flux.empty());
+
+        when(paymentApiService.getBalance()).thenReturn(Mono.just(100D));
 
         webTestClient.get()
                 .uri("/cart/items")

@@ -1,0 +1,37 @@
+openapi: 3.0.3
+info:
+  title: Сервис платежей
+  version: 1.0.0
+paths:
+  /balance:
+    get:
+      tags:
+        - payment
+      summary: Получение баланса на счёте
+      responses:
+        '200':
+          description: Балланс
+          content:
+            application/json:
+              schema:
+                type: number
+                format: double
+                example: 1234.56
+  /pay:
+    put:
+      tags:
+        - payment
+      summary: Осуществление платежа
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: number
+              format: double
+              example: 1234.56
+      responses:
+        '200':
+          description: Оплата успешно выполнена
+        '402':
+          description: Недостаточно средств

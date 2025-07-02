@@ -5,14 +5,19 @@ import com.intershop.dto.ItemActionEnum;
 import com.intershop.initdb.InitTestDb;
 import com.intershop.repository.CartRepository;
 import com.intershop.repository.OrdersRepository;
+import com.intershop.service.PaymentApiService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.BodyInserters;
+import reactor.core.publisher.Mono;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyDouble;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class IntegrationTest extends InitTestDb {
@@ -26,8 +31,13 @@ public class IntegrationTest extends InitTestDb {
     @Autowired
     private WebTestClient webTestClient;
 
+    @MockitoBean
+    private PaymentApiService paymentApiService;
+
     @Test
     void buyIntegrationTest() {
+        when(paymentApiService.pay(anyDouble())).thenReturn(Mono.empty());
+
         int before = ordersRepository.findAll().collectList().block().size();
 
         webTestClient.post()
@@ -83,7 +93,7 @@ public class IntegrationTest extends InitTestDb {
                 .expectHeader().valueEquals("Location", "/main/items");
 
         Cart cart = cartRepository.findById(itemInCartId).block();
-        assertNull(cart); // или:
+        assertNull(cart);
     }
 
 }

@@ -3,13 +3,13 @@ package com.intershop.controller;
 import com.intershop.dto.ItemActionEnum;
 import com.intershop.service.CartService;
 import com.intershop.service.ItemService;
+import com.intershop.service.PaymentApiService;
 import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.client.WebClientRequestException;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.net.URI;
 import java.util.Map;
 
@@ -20,12 +20,19 @@ public class CartHandler {
 
     private final CartService cartService;
 
-    public CartHandler(ItemService itemService, CartService cartService) {
+    private final PaymentApiService paymentApiService;
+
+    public CartHandler(ItemService itemService, CartService cartService, PaymentApiService paymentApiService) {
         this.itemService = itemService;
         this.cartService = cartService;
+        this.paymentApiService = paymentApiService;
     }
 
     public Mono<ServerResponse> getCartItems(ServerRequest request) {
+        boolean paymentError = request.queryParam("paymentError")
+                .map(Boolean::parseBoolean)
+                .orElse(false);
+
         return itemService.getCartItems()
                 .collectList()
                 .flatMap(itemDtoList -> {
@@ -33,15 +40,30 @@ public class CartHandler {
                             .mapToDouble(item -> item.getCount() * item.getPrice())
                             .sum();
 
-                    return ServerResponse.ok().render("cart", Map.of(
-                            "items", itemDtoList,
-                            "total", BigDecimal.valueOf(total).setScale(2, RoundingMode.HALF_UP),
-                            "empty", itemDtoList.isEmpty()
-                    ));
+                    return paymentApiService.getBalance()
+                            .flatMap(balance -> {
+                                return ServerResponse.ok().render("cart", Map.of(
+                                        "items", itemDtoList,
+                                        "total", total,
+                                        "empty", itemDtoList.isEmpty(),
+                                        "balance", balance,
+                                        "paymentError", paymentError ? "Оплата заказа не прошла" : ""
+                                ));
+                            })
+                            .onErrorResume(WebClientRequestException.class, ex -> {
+                                return ServerResponse.ok().render("cart", Map.of(
+                                        "items", itemDtoList,
+                                        "total", total,
+                                        "empty", itemDtoList.isEmpty(),
+                                        "error", "Сервер платежей не доступен, попробуйте позже",
+                                        "paymentError", paymentError ? "Оплата заказа не прошла" : ""
+                                ));
+                            });
                 });
+
     }
 
-    public Mono<ServerResponse> changeCartItem(ServerRequest request){
+    public Mono<ServerResponse> changeCartItem(ServerRequest request) {
         Long id = Long.valueOf(request.pathVariable("id"));
         return request.formData()
                 .map(data -> data.getFirst("action"))
