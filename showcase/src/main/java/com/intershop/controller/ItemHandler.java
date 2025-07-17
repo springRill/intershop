@@ -3,6 +3,8 @@ package com.intershop.controller;
 import com.intershop.dto.ItemActionEnum;
 import com.intershop.service.CartService;
 import com.intershop.service.ItemService;
+import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
@@ -32,6 +34,7 @@ public class ItemHandler {
         });
     }
 
+    @PreAuthorize("isAuthenticated()")
     public Mono<ServerResponse> changeCartItem(ServerRequest request) {
         Long id = Long.valueOf(request.pathVariable("id"));
         return request.formData()

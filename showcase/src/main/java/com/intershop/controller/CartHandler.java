@@ -4,6 +4,7 @@ import com.intershop.dto.ItemActionEnum;
 import com.intershop.service.CartService;
 import com.intershop.service.ItemService;
 import com.intershop.service.PaymentApiService;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClientRequestException;
 import org.springframework.web.reactive.function.server.ServerRequest;
@@ -28,6 +29,7 @@ public class CartHandler {
         this.paymentApiService = paymentApiService;
     }
 
+    @PreAuthorize("isAuthenticated()")
     public Mono<ServerResponse> getCartItems(ServerRequest request) {
         boolean paymentError = request.queryParam("paymentError")
                 .map(Boolean::parseBoolean)
@@ -63,6 +65,7 @@ public class CartHandler {
 
     }
 
+    @PreAuthorize("isAuthenticated()")
     public Mono<ServerResponse> changeCartItem(ServerRequest request) {
         Long id = Long.valueOf(request.pathVariable("id"));
         return request.formData()

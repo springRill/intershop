@@ -8,7 +8,7 @@ import com.intershop.service.ItemService;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.core.context.ReactiveSecurityContextHolder;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
@@ -64,6 +64,7 @@ public class MainHandler {
 
     }
 
+    @PreAuthorize("isAuthenticated()")
     public Mono<ServerResponse> changeCartItem(ServerRequest request){
         Long id = Long.valueOf(request.pathVariable("id"));
         return request.formData()

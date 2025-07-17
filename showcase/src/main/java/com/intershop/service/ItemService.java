@@ -80,7 +80,7 @@ public class ItemService {
                 );
     }
 
-    @Cacheable(value = "items", key = "#id")
+//    @Cacheable(value = "items", key = "#id")
     public Mono<ItemDto> findByItemId(Long id) {
         return itemRepository.findById(id)
                 .switchIfEmpty(Mono.error(new RuntimeException("Item not found")))

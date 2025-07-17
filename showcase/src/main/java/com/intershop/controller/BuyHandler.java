@@ -3,6 +3,7 @@ package com.intershop.controller;
 import com.intershop.service.BuyService;
 import com.intershop.service.ItemService;
 import com.intershop.service.PaymentApiService;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import org.springframework.web.reactive.function.server.ServerRequest;
@@ -26,6 +27,7 @@ public class BuyHandler {
         this.paymentApiService = paymentApiService;
     }
 
+    @PreAuthorize("isAuthenticated()")
     public Mono<ServerResponse> buy(ServerRequest request) {
         return itemService.getCartItems()
                 .collectList()
@@ -45,15 +47,6 @@ public class BuyHandler {
                                         .build();
                             });
                 });
-    }
-
-    public Mono<ServerResponse> buy2(ServerRequest request) {
-        return buyService.buyCart()
-                .flatMap(orderId ->
-                        ServerResponse
-                                .seeOther(URI.create("/orders/%d?newOrder=true".formatted(orderId)))
-                                .build()
-                );
     }
 
 }
