@@ -19,10 +19,10 @@
     </form>
 </div>
 
-<a href="/orders" style="float:right;">
+<a href="/orders" style="float:right;" th:if="${isAuthenticated}">
     <b>ЗАКАЗЫ &cudarrr;</b>
 </a>
-<a href="/cart/items" style="float:right;">
+<a href="/cart/items" style="float:right;" th:if="${isAuthenticated}">
     <b>КОРЗИНА &cudarrr;</b>
 </a>
 <a href="/main/items" style="float:right;">

@@ -19,7 +19,7 @@
     </form>
 </div>
 
-<a href="/orders" style="float:right;">
+<a href="/orders" style="float:right;" th:if="${isAuthenticated}">
     <b>ЗАКАЗЫ &cudarrr;</b>
 </a>
 <a href="/main/items" style="float:right;">
@@ -47,7 +47,7 @@
                 </tr>
                 <tr>
                     <td>
-                        <form th:action="${'/cart/items/'+item.getId()}" method="post">
+                        <form th:action="${'/cart/items/'+item.getId()}" method="post" th:if="${isAuthenticated}">
                             <button name="action" value="MINUS">-</button>
                             <span th:text="${item.getCount()}"></span>
                             <button name="action" value="PLUS">+</button>
