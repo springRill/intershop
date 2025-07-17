@@ -42,7 +42,7 @@ public class CartHandler {
 
                     return paymentApiService.getBalance()
                             .flatMap(balance -> {
-                                return ServerResponse.ok().render("cart", Map.of(
+                                return ViewRenderer.render("cart", Map.of(
                                         "items", itemDtoList,
                                         "total", total,
                                         "empty", itemDtoList.isEmpty(),
@@ -51,7 +51,7 @@ public class CartHandler {
                                 ));
                             })
                             .onErrorResume(WebClientRequestException.class, ex -> {
-                                return ServerResponse.ok().render("cart", Map.of(
+                                return ViewRenderer.render("cart", Map.of(
                                         "items", itemDtoList,
                                         "total", total,
                                         "empty", itemDtoList.isEmpty(),

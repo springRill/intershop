@@ -8,6 +8,7 @@ import com.intershop.service.ItemService;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
@@ -53,7 +54,7 @@ public class MainHandler {
                 }
             }
 
-            return ServerResponse.ok().render("main", Map.of(
+            return ViewRenderer.render("main", Map.of(
                     "items", itemsByRows,
                     "search", search,
                     "sort", sort.name(),

@@ -2,11 +2,23 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 
 <head>
-    <meta charset="UTF-8" />
+    <meta charset="UTF-8"/>
     <title>Корзина товаров</title>
 </head>
 
 <body>
+<div th:if="${!isAuthenticated}">
+    <form th:action="@{/login}" method="get">
+        <button type="submit">Войти</button>
+    </form>
+</div>
+<div th:if="${isAuthenticated}">
+    <form th:action="@{/logout}" method="post">
+        <button type="submit">Выйти</button>
+        <span style="margin-left: 10px;"><b th:text="${auth.name}"></b></span>
+    </form>
+</div>
+
 <a href="/orders" style="float:right;">
     <b>ЗАКАЗЫ &cudarrr;</b>
 </a>
@@ -30,7 +42,9 @@
                         <b th:text="${item.getPrice()}+' руб.'"></b>
                     </td>
                 </tr>
-                <tr><td th:text="${item.getDescription()}"></td></tr>
+                <tr>
+                    <td th:text="${item.getDescription()}"></td>
+                </tr>
                 <tr>
                     <td>
                         <form th:action="${'/cart/items/'+item.getId()}" method="post">
@@ -54,21 +68,23 @@
     </tr>
     <tr>
         <td style="text-align:right">
-<!--
-            <form action="/buy" method="post" th:if="${!empty}">
-                <button>Купить</button>
-            </form>
--->
+            <!--
+                        <form action="/buy" method="post" th:if="${!empty}">
+                            <button>Купить</button>
+                        </form>
+            -->
             <form action="/buy" method="post" th:if="${error == null} and ${!empty} and ${balance} >= ${total}">
                 <button>Купить</button>
             </form>
-            <b th:if="${error == null} and ${!empty} and ${balance} < ${total}" th:text="'Недостаточно средств для покупки'" style="color: red; font-weight: bold;"></b>
-<!--
-            <form action="/buy" method="post" th:if="${!empty}">
-                <button>Все равно Купить</button>
-            </form>
--->
-            <b th:if="${paymentError != null}" th:text="''+${paymentError}+''" style="color: red; font-weight: bold;"></b>
+            <b th:if="${error == null} and ${!empty} and ${balance} < ${total}"
+               th:text="'Недостаточно средств для покупки'" style="color: red; font-weight: bold;"></b>
+            <!--
+                        <form action="/buy" method="post" th:if="${!empty}">
+                            <button>Все равно Купить</button>
+                        </form>
+            -->
+            <b th:if="${paymentError != null}" th:text="''+${paymentError}+''"
+               style="color: red; font-weight: bold;"></b>
         </td>
     </tr>
 </table>

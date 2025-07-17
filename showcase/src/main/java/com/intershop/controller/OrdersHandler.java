@@ -20,7 +20,7 @@ public class OrdersHandler {
     public Mono<ServerResponse> getOrders(ServerRequest request) {
         return orderService.getOrders()
                 .collectList()
-                .flatMap(orders -> ServerResponse.ok().render("orders", Map.of("orders", orders)));
+                .flatMap(orders -> ViewRenderer.render("orders", Map.of("orders", orders)));
     }
 
     public Mono<ServerResponse> getOrder(ServerRequest request) {
@@ -28,7 +28,7 @@ public class OrdersHandler {
         boolean newOrder = Boolean.parseBoolean(request.queryParam("newOrder").orElse("false"));
 
         return orderService.getOrder(id)
-                .flatMap(order -> ServerResponse.ok().render("order", Map.of(
+                .flatMap(order -> ViewRenderer.render("order", Map.of(
                         "order", order,
                         "newOrder", newOrder
                 )));

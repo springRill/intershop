@@ -26,7 +26,7 @@ public class ItemHandler {
     public Mono<ServerResponse> getItems(ServerRequest request) {
         Long id = Long.valueOf(request.pathVariable("id"));
         return itemService.findByItemId(id).flatMap(itemDto -> {
-            return ServerResponse.ok().render("item", Map.of(
+            return ViewRenderer.render("item", Map.of(
                     "item", itemDto
             ));
         });
@@ -39,7 +39,6 @@ public class ItemHandler {
                 .map(ItemActionEnum::valueOf)
                 .flatMap(action -> cartService.changeCartItem(id, action))
                 .then(ServerResponse.seeOther(URI.create("/items/%d".formatted(id))).build());
-
     }
 
 }

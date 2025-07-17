@@ -1,14 +1,18 @@
 package com.intershop.initdb;
 
+import com.intershop.domain.AppUser;
 import com.intershop.domain.Item;
+import com.intershop.repository.AppUserRepository;
 import com.intershop.repository.ItemRepository;
 import com.intershop.service.ImageService;
 import io.r2dbc.spi.ConnectionFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.r2dbc.core.DatabaseClient;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
@@ -33,20 +37,71 @@ public class DataInitializer implements CommandLineRunner {
 
     private final ConnectionFactory connectionFactory;
 
+    private final AppUserRepository appUserRepository;
+
+    private final PasswordEncoder passwordEncoder;
+
 
     @Value("${items.path:items}")
     private String itemsDirectory;
 
-    public DataInitializer(ItemRepository itemRepository, ImageService imageService, ConnectionFactory connectionFactory) {
+    public DataInitializer(ItemRepository itemRepository, ImageService imageService, ConnectionFactory connectionFactory, AppUserRepository appUserRepository, PasswordEncoder passwordEncoder) {
         this.itemRepository = itemRepository;
         this.imageService = imageService;
         this.connectionFactory = connectionFactory;
+        this.appUserRepository = appUserRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
     public void run(String... args) throws Exception {
+        //создание таблиц в базе
         executeSqlFromFile("schema.sql");
 
+        //добавление пользователей
+        setAppUsers();
+
+        //импорт товаров
+        setItems();
+    }
+
+    private void setAppUsers(){
+        AppUser appUser1 = new AppUser();
+        appUser1.setUsername("user1");
+        appUser1.setPassword(passwordEncoder.encode("password1"));
+        appUserRepository.save(appUser1).subscribe();
+
+        AppUser appUser2 = new AppUser();
+        appUser2.setUsername("user2");
+        appUser2.setPassword(passwordEncoder.encode("password2"));
+        appUserRepository.save(appUser2).subscribe();
+
+        AppUser appUser = new AppUser();
+        appUser.setUsername("11");
+        appUser.setPassword(passwordEncoder.encode("11")); // bcrypt
+        appUserRepository.save(appUser).subscribe();
+
+    }
+
+    private void executeSqlFromFile(String filename) throws Exception {
+        String sql;
+        try (BufferedReader reader = new BufferedReader(
+                new InputStreamReader(new ClassPathResource(filename).getInputStream(), StandardCharsets.UTF_8))) {
+            sql = reader.lines().collect(Collectors.joining("\n"));
+        }
+
+        for (String statement : sql.split(";")) {
+            String trimmed = statement.trim();
+            if (!trimmed.isEmpty()) {
+                DatabaseClient.create(connectionFactory)
+                        .sql(trimmed)
+                        .then()
+                        .block();
+            }
+        }
+    }
+
+    private void setItems() throws IOException {
         Path rootDir = Paths.get(itemsDirectory);
 
         List<Path> sourceItemFolders = Files.list(rootDir)
@@ -71,25 +126,6 @@ public class DataInitializer implements CommandLineRunner {
                 item.setPrice(Double.valueOf(lines.get(2)));
 
                 itemRepository.save(item).block();
-            }
-        }
-
-    }
-
-    private void executeSqlFromFile(String filename) throws Exception {
-        String sql;
-        try (BufferedReader reader = new BufferedReader(
-                new InputStreamReader(new ClassPathResource(filename).getInputStream(), StandardCharsets.UTF_8))) {
-            sql = reader.lines().collect(Collectors.joining("\n"));
-        }
-
-        for (String statement : sql.split(";")) {
-            String trimmed = statement.trim();
-            if (!trimmed.isEmpty()) {
-                DatabaseClient.create(connectionFactory)
-                        .sql(trimmed)
-                        .then()
-                        .block();
             }
         }
     }
