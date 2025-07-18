@@ -6,9 +6,10 @@ import com.intershop.repository.AppUserRepository;
 import com.intershop.repository.ItemRepository;
 import com.intershop.service.ImageService;
 import io.r2dbc.spi.ConnectionFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.r2dbc.core.DatabaseClient;
@@ -54,6 +55,11 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     @Override
+    @Caching(evict = {
+            @CacheEvict(value = "itemPages", allEntries = true),
+            @CacheEvict(value = "carts", allEntries = true),
+            @CacheEvict(value = "items", allEntries = true)
+    })
     public void run(String... args) throws Exception {
         //создание таблиц в базе
         executeSqlFromFile("schema.sql");
@@ -76,10 +82,15 @@ public class DataInitializer implements CommandLineRunner {
         appUser2.setPassword(passwordEncoder.encode("password2"));
         appUserRepository.save(appUser2).subscribe();
 
-        AppUser appUser = new AppUser();
-        appUser.setUsername("11");
-        appUser.setPassword(passwordEncoder.encode("11")); // bcrypt
-        appUserRepository.save(appUser).subscribe();
+        AppUser appUser11 = new AppUser();
+        appUser11.setUsername("11");
+        appUser11.setPassword(passwordEncoder.encode("11"));
+        appUserRepository.save(appUser11).subscribe();
+
+        AppUser appUser22 = new AppUser();
+        appUser22.setUsername("22");
+        appUser22.setPassword(passwordEncoder.encode("22"));
+        appUserRepository.save(appUser22).subscribe();
 
     }
 

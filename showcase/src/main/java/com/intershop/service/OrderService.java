@@ -26,11 +26,11 @@ public class OrderService {
         this.itemRepository = itemRepository;
     }
 
-    public Mono<OrdersDto> getOrder(Long id) {
-        return ordersRepository.findById(id)
+    public Mono<OrdersDto> getOrder(Long orderId, Long userId) {
+        return ordersRepository.findById(orderId)
                 .switchIfEmpty(Mono.error(new Exception("Order not found")))
                 .flatMap(order ->
-                        cartRepository.findByOrderId(order.getId()) // Flux<Cart>
+                        cartRepository.findByOrderIdAndUserId(order.getId(), userId) // Flux<Cart>
                                 .flatMap(cart ->
                                         itemRepository.findById(cart.getItemId())
                                                 .map(item -> {
@@ -54,10 +54,10 @@ public class OrderService {
                 );
     }
 
-    public Flux<OrdersDto> getOrders() {
+    public Flux<OrdersDto> getOrders(Long userId) {
         return ordersRepository.findAll()
                 .flatMap(order ->
-                        cartRepository.findByOrderId(order.getId())
+                        cartRepository.findByOrderIdAndUserId(order.getId(), userId)
                                 .flatMap(cart ->
                                         itemRepository.findById(cart.getItemId())
                                                 .map(item -> {
@@ -67,6 +67,7 @@ public class OrderService {
                                                 })
                                 )
                                 .collectList()
+                                .filter(itemDtoList -> !itemDtoList.isEmpty())
                                 .map(itemDtoList -> {
                                     OrdersDto ordersDto = OrderMapper.toOrdersDto(order);
                                     ordersDto.setItems(itemDtoList);

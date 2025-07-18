@@ -23,12 +23,13 @@ public class BuyService {
 
     @Caching(evict = {
             @CacheEvict(value = "itemPages", allEntries = true),
-            @CacheEvict(value = "carts", allEntries = true)
+            @CacheEvict(value = "carts", allEntries = true),
+            @CacheEvict(value = "items", allEntries = true)
     })
-    public Mono<Long> buyCart() {
+    public Mono<Long> buyCart(Long userId) {
         return ordersRepository.save(new Orders())
                 .flatMap(order ->
-                        cartRepository.findByOrderIdIsNull(Sort.by(Sort.Direction.ASC, "id"))
+                        cartRepository.findByUserIdAndOrderIdIsNull(userId, Sort.by(Sort.Direction.ASC, "id"))
                                 .flatMap(cart -> {
                                     cart.setOrderId(order.getId());
                                     return cartRepository.save(cart);

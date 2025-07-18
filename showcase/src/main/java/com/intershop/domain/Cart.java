@@ -21,4 +21,6 @@ public class Cart {
 
     private Long orderId;
 
+    private Long userId;
+
 }

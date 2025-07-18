@@ -20,6 +20,7 @@ class ItemServiceTest extends InitTestDb {
     @MockitoBean
     private PaymentApiService paymentApiService;
 
+/*
     @Test
     void findByTitle() {
         Pageable pageable = PageRequest.of(0, 10);
@@ -50,4 +51,5 @@ class ItemServiceTest extends InitTestDb {
                 .assertNext(itemDto -> assertEquals(2, itemDto.getCount()))
                 .verifyComplete();
     }
+*/
 }

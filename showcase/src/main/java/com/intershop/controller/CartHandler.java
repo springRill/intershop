@@ -4,6 +4,7 @@ import com.intershop.dto.ItemActionEnum;
 import com.intershop.service.CartService;
 import com.intershop.service.ItemService;
 import com.intershop.service.PaymentApiService;
+import com.intershop.utils.AuthUtils;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClientRequestException;
@@ -35,43 +36,49 @@ public class CartHandler {
                 .map(Boolean::parseBoolean)
                 .orElse(false);
 
-        return itemService.getCartItems()
-                .collectList()
-                .flatMap(itemDtoList -> {
-                    double total = itemDtoList.stream()
-                            .mapToDouble(item -> item.getCount() * item.getPrice())
-                            .sum();
+        return AuthUtils.getCurrentUserId(request)
+                .flatMap(userId -> {
+                    return itemService.getCartItemsByUserId(userId)
+                            .collectList()
+                            .flatMap(itemDtoList -> {
+                                double total = itemDtoList.stream()
+                                        .mapToDouble(item -> item.getCount() * item.getPrice())
+                                        .sum();
 
-                    return paymentApiService.getBalance()
-                            .flatMap(balance -> {
-                                return ViewRenderer.render("cart", Map.of(
-                                        "items", itemDtoList,
-                                        "total", total,
-                                        "empty", itemDtoList.isEmpty(),
-                                        "balance", balance,
-                                        "paymentError", paymentError ? "Оплата заказа не прошла" : ""
-                                ));
-                            })
-                            .onErrorResume(WebClientRequestException.class, ex -> {
-                                return ViewRenderer.render("cart", Map.of(
-                                        "items", itemDtoList,
-                                        "total", total,
-                                        "empty", itemDtoList.isEmpty(),
-                                        "error", "Сервер платежей не доступен, попробуйте позже",
-                                        "paymentError", paymentError ? "Оплата заказа не прошла" : ""
-                                ));
+                                return paymentApiService.getBalance(userId)
+                                        .flatMap(balance -> {
+                                            return AuthUtils.render("cart", Map.of(
+                                                    "items", itemDtoList,
+                                                    "total", total,
+                                                    "empty", itemDtoList.isEmpty(),
+                                                    "balance", balance,
+                                                    "paymentError", paymentError ? "Оплата заказа не прошла" : ""
+                                            ));
+                                        })
+                                        .onErrorResume(WebClientRequestException.class, ex -> {
+                                            return AuthUtils.render("cart", Map.of(
+                                                    "items", itemDtoList,
+                                                    "total", total,
+                                                    "empty", itemDtoList.isEmpty(),
+                                                    "error", "Сервер платежей не доступен, попробуйте позже",
+                                                    "paymentError", paymentError ? "Оплата заказа не прошла" : ""
+                                            ));
+                                        });
                             });
-                });
 
+                });
     }
 
     @PreAuthorize("isAuthenticated()")
     public Mono<ServerResponse> changeCartItem(ServerRequest request) {
         Long id = Long.valueOf(request.pathVariable("id"));
-        return request.formData()
-                .map(data -> data.getFirst("action"))
-                .map(ItemActionEnum::valueOf)
-                .flatMap(action -> cartService.changeCartItem(id, action))
+        return AuthUtils.getCurrentUserId(request)
+                .flatMap(userId -> {
+                    return request.formData()
+                            .map(data -> data.getFirst("action"))
+                            .map(ItemActionEnum::valueOf)
+                            .flatMap(action -> cartService.changeCartItem(id, action, userId));
+                })
                 .then(ServerResponse.seeOther(URI.create("/cart/items")).build());
     }
 

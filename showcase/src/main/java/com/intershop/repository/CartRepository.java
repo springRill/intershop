@@ -7,10 +7,10 @@ import reactor.core.publisher.Flux;
 
 public interface CartRepository extends R2dbcRepository<Cart, Long> {
 
-    Flux<Cart> findByOrderIdIsNull(Sort sort);
+    Flux<Cart> findByUserIdAndOrderIdIsNull(Long userId, Sort sort);
 
-    Flux<Cart> findByItemIdAndOrderIdIsNull(Long itemId);
+    Flux<Cart> findByItemIdAndUserIdAndOrderIdIsNull(Long itemId, Long userId);
 
-    Flux<Cart> findByOrderId(Long orderId);
+    Flux<Cart> findByOrderIdAndUserId(Long orderId, Long userId);
 
 }

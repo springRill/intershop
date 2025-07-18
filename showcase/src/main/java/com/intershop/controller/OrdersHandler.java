@@ -1,6 +1,7 @@
 package com.intershop.controller;
 
 import com.intershop.service.OrderService;
+import com.intershop.utils.AuthUtils;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
@@ -20,21 +21,27 @@ public class OrdersHandler {
 
     @PreAuthorize("isAuthenticated()")
     public Mono<ServerResponse> getOrders(ServerRequest request) {
-        return orderService.getOrders()
-                .collectList()
-                .flatMap(orders -> ViewRenderer.render("orders", Map.of("orders", orders)));
+        return AuthUtils.getCurrentUserId(request)
+                .flatMap(userId -> {
+                    return orderService.getOrders(userId)
+                            .collectList()
+                            .flatMap(orders -> AuthUtils.render("orders", Map.of("orders", orders)));
+                });
     }
 
     @PreAuthorize("isAuthenticated()")
     public Mono<ServerResponse> getOrder(ServerRequest request) {
-        Long id = Long.valueOf(request.pathVariable("id"));
+        Long orgerId = Long.valueOf(request.pathVariable("id"));
         boolean newOrder = Boolean.parseBoolean(request.queryParam("newOrder").orElse("false"));
 
-        return orderService.getOrder(id)
-                .flatMap(order -> ViewRenderer.render("order", Map.of(
-                        "order", order,
-                        "newOrder", newOrder
-                )));
+        return AuthUtils.getCurrentUserId(request)
+                .flatMap(userId -> {
+                    return orderService.getOrder(orgerId, userId)
+                            .flatMap(order -> AuthUtils.render("order", Map.of(
+                                    "order", order,
+                                    "newOrder", newOrder
+                            )));
+                });
     }
 
 }

@@ -7,7 +7,18 @@ paths:
     get:
       tags:
         - payment
-      summary: Получение баланса на счёте
+      summary: Получение баланса на счёте по userId
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userId:
+                  type: integer
+                  format: int64
+                  example: 123
       responses:
         '200':
           description: Балланс
@@ -21,15 +32,27 @@ paths:
     put:
       tags:
         - payment
-      summary: Осуществление платежа
+      summary: Осуществление платежа по userId
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              type: number
-              format: double
-              example: 1234.56
+              type: object
+              properties:
+                amount:
+                  type: number
+                  format: double
+                  example: 1234.56
+                  description: Сумма платежа
+                userId:
+                  type: integer
+                  format: int64
+                  example: 123456789
+                  description: Идентификатор пользователя
+              required:
+                - amount
+                - userId
       responses:
         '200':
           description: Оплата успешно выполнена

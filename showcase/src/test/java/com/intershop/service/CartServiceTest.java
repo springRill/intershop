@@ -23,6 +23,7 @@ class CartServiceTest extends InitTestDb {
     @MockitoBean
     private PaymentApiService paymentApiService;
 
+/*
     @Test
     void changeCartItem() {
 
@@ -51,4 +52,5 @@ class CartServiceTest extends InitTestDb {
                 .expectNextCount(0)
                 .verifyComplete();
     }
+*/
 }

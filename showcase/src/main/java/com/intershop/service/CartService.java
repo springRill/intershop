@@ -19,12 +19,13 @@ public class CartService {
 
     @Caching(evict = {
             @CacheEvict(value = "itemPages", allEntries = true),
-            @CacheEvict(value = "carts", allEntries = true)
+            @CacheEvict(value = "carts", allEntries = true),
+            @CacheEvict(value = "items", allEntries = true)
     })
-    public Mono<Void> changeCartItem(Long itemId, ItemActionEnum action) {
-        return cartRepository.findByItemIdAndOrderIdIsNull(itemId)
+    public Mono<Void> changeCartItem(Long itemId, ItemActionEnum action, Long userId) {
+        return cartRepository.findByItemIdAndUserIdAndOrderIdIsNull(itemId, userId)
                 .next()
-                .defaultIfEmpty(new Cart(null, itemId, 0, null))
+                .defaultIfEmpty(new Cart(null, itemId, 0, null, userId))
                 .flatMap(cart -> {
                     Integer count = cart.getCount() == null ? 0 : cart.getCount();
 

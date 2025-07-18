@@ -3,7 +3,7 @@ package com.intershop.controller;
 import com.intershop.dto.ItemActionEnum;
 import com.intershop.service.CartService;
 import com.intershop.service.ItemService;
-import org.springframework.security.access.annotation.Secured;
+import com.intershop.utils.AuthUtils;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
@@ -27,20 +27,27 @@ public class ItemHandler {
 
     public Mono<ServerResponse> getItems(ServerRequest request) {
         Long id = Long.valueOf(request.pathVariable("id"));
-        return itemService.findByItemId(id).flatMap(itemDto -> {
-            return ViewRenderer.render("item", Map.of(
-                    "item", itemDto
-            ));
-        });
+        return AuthUtils.getCurrentUserId(request)
+                .flatMap(userId -> {
+                    return itemService.findByItemIdAndUserId(id, userId).flatMap(itemDto -> {
+                        return AuthUtils.render("item", Map.of(
+                                "item", itemDto
+                        ));
+                    });
+                });
     }
 
     @PreAuthorize("isAuthenticated()")
     public Mono<ServerResponse> changeCartItem(ServerRequest request) {
         Long id = Long.valueOf(request.pathVariable("id"));
-        return request.formData()
-                .map(data -> data.getFirst("action"))
-                .map(ItemActionEnum::valueOf)
-                .flatMap(action -> cartService.changeCartItem(id, action))
+        return AuthUtils.getCurrentUserId(request)
+                .flatMap(userId -> {
+                    return request.formData()
+                            .map(data -> data.getFirst("action"))
+                            .map(ItemActionEnum::valueOf)
+                            .flatMap(action -> cartService.changeCartItem(id, action, userId));
+
+                })
                 .then(ServerResponse.seeOther(URI.create("/items/%d".formatted(id))).build());
     }
 

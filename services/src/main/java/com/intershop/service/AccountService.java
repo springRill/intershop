@@ -3,18 +3,28 @@ package com.intershop.service;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Service
 public class AccountService {
 
-    private Double balance = 3000D;
+    private Map<Long, Double> balanceMap = new HashMap<>();
 
-    public Mono<Double> getBalance(){
-        return Mono.just(balance);
+    private Double getUserBalance(Long userId){
+        if(!balanceMap.containsKey(userId)){
+            balanceMap.put(userId, 3000D);
+        }
+        return balanceMap.get(userId);
     }
 
-    public Mono<Void> pay(Double amount) {
-        if (amount <= balance) {
-            balance -= amount;
+    public Mono<Double> getBalance(Long userId){
+        return Mono.just(getUserBalance(userId));
+    }
+
+    public Mono<Void> pay(Double amount, Long userId) {
+        if (amount <= getUserBalance(userId)) {
+            balanceMap.put(userId, balanceMap.get(userId) - amount);
             return Mono.empty(); // успех
         } else {
             return Mono.error(new RuntimeException("Недостаточно средств на счёте"));

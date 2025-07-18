@@ -3,6 +3,7 @@ package com.intershop.controller;
 import com.intershop.service.BuyService;
 import com.intershop.service.ItemService;
 import com.intershop.service.PaymentApiService;
+import com.intershop.utils.AuthUtils;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
@@ -29,24 +30,26 @@ public class BuyHandler {
 
     @PreAuthorize("isAuthenticated()")
     public Mono<ServerResponse> buy(ServerRequest request) {
-        return itemService.getCartItems()
-                .collectList()
-                .flatMap(itemDtoList -> {
-                    double total = itemDtoList.stream()
-                            .mapToDouble(item -> item.getCount() * item.getPrice())
-                            .sum();
+        return AuthUtils.getCurrentUserId(request).flatMap(userId -> {
+            return itemService.getCartItemsByUserId(userId)
+                    .collectList()
+                    .flatMap(itemDtoList -> {
+                        double total = itemDtoList.stream()
+                                .mapToDouble(item -> item.getCount() * item.getPrice())
+                                .sum();
 
-                    return paymentApiService.pay(total)
-                            .then(buyService.buyCart())
-                            .flatMap(orderId -> {
-                               return ServerResponse.seeOther(URI.create("/orders/%d?newOrder=true".formatted(orderId)))
-                                        .build();
-                            })
-                            .onErrorResume(WebClientResponseException.class, e -> {
-                                return ServerResponse.seeOther(URI.create("/cart/items?paymentError=true"))
-                                        .build();
-                            });
-                });
+                        return paymentApiService.pay(total, userId)
+                                .then(buyService.buyCart(userId))
+                                .flatMap(orderId -> {
+                                    return ServerResponse.seeOther(URI.create("/orders/%d?newOrder=true".formatted(orderId)))
+                                            .build();
+                                })
+                                .onErrorResume(WebClientResponseException.class, e -> {
+                                    return ServerResponse.seeOther(URI.create("/cart/items?paymentError=true"))
+                                            .build();
+                                });
+                    });
+        });
     }
 
 }

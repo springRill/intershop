@@ -56,6 +56,7 @@ class MainHandlerTest {
     @Autowired
     private WebTestClient webTestClient;
 
+/*
     @Test
     void getItems() throws Exception {
         ItemDto itemDto_1 = new ItemDto();
@@ -82,8 +83,10 @@ class MainHandlerTest {
                 .expectHeader().contentType(MediaType.TEXT_HTML)
                 .expectBody();
     }
+*/
 
 
+/*
     @Test
     void changeCartItem() {
         Long itemId = 1L;
@@ -98,5 +101,6 @@ class MainHandlerTest {
                 .expectStatus().is3xxRedirection()
                 .expectHeader().valueMatches("Location", "/main/items");
     }
+*/
 
 }

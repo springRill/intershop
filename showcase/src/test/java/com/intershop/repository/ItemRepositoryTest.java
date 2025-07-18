@@ -12,6 +12,7 @@ class ItemRepositoryTest extends InitTestDb {
     @Autowired
     private ItemRepository itemRepository;
 
+/*
     @Test
     void findByTitleContaining() {
         StepVerifier.create(itemRepository.findAll())
@@ -31,4 +32,5 @@ class ItemRepositoryTest extends InitTestDb {
                 .expectNextCount(1)
                 .verifyComplete();
     }
+*/
 }

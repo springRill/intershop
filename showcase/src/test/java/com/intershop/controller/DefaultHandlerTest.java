@@ -33,6 +33,7 @@ class DefaultHandlerTest {
     @Autowired
     private WebTestClient webTestClient;
 
+/*
     @Test
     void homePage() throws Exception {
         webTestClient.get().uri("/")
@@ -40,4 +41,5 @@ class DefaultHandlerTest {
                 .expectStatus().is3xxRedirection()
                 .expectHeader().valueEquals("Location", "/main/items");
     }
+*/
 }

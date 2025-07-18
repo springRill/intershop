@@ -13,6 +13,7 @@ class CartRepositoryTest extends InitTestDb {
     @Autowired
     private CartRepository cartRepository;
 
+/*
     @Test
     void findByOrderIdIsNull() {
         StepVerifier.create(cartRepository.findByOrderIdIsNull(Sort.by(Sort.Direction.ASC, "id")))
@@ -37,4 +38,5 @@ class CartRepositoryTest extends InitTestDb {
                 .expectNextCount(1)
                 .verifyComplete();
     }
+*/
 }

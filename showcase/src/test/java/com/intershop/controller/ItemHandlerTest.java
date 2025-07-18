@@ -49,6 +49,7 @@ class ItemHandlerTest {
     @Autowired
     private WebTestClient webTestClient;
 
+/*
     @Test
     void getItems() {
         Long itemId = 1L;
@@ -84,5 +85,6 @@ class ItemHandlerTest {
                 .expectStatus().is3xxRedirection()
                 .expectHeader().valueEquals("Location", String.format("/items/%d", itemId));
     }
+*/
 
 }

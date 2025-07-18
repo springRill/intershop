@@ -15,7 +15,7 @@
 <div th:if="${isAuthenticated}">
     <form th:action="@{/logout}" method="post">
         <button type="submit">Выйти</button>
-        <span style="margin-left: 10px;"><b th:text="${auth.name}"></b></span>
+        <span style="margin-left: 10px;"><b th:text="'Пользователь: '+${auth.name}"></b></span>
     </form>
 </div>
 

@@ -1,5 +1,7 @@
 package com.intershop.controller;
 
+import com.intershop.server.domain.BalanceGetRequest;
+import com.intershop.server.domain.PayPutRequest;
 import com.intershop.service.AccountService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -17,14 +19,13 @@ public class AccountController implements PaymentApi {
     }
 
     @Override
-    public Mono<ResponseEntity<Double>> balanceGet(ServerWebExchange exchange) {
-        return accountService.getBalance().map(ResponseEntity::ok);
+    public Mono<ResponseEntity<Double>> balanceGet(Mono<BalanceGetRequest> balanceGetRequest, ServerWebExchange exchange) {
+        return balanceGetRequest.flatMap(request -> accountService.getBalance(request.getUserId())).map(ResponseEntity::ok);
     }
 
     @Override
-    public Mono<ResponseEntity<Void>> payPut(Mono<Double> body, ServerWebExchange exchange) {
-        return body
-                .flatMap(accountService::pay)
+    public Mono<ResponseEntity<Void>> payPut(Mono<PayPutRequest> payPutRequest, ServerWebExchange exchange) {
+        return payPutRequest.flatMap(request -> accountService.pay(request.getAmount(), request.getUserId()))
                 .thenReturn(ResponseEntity.ok().<Void>build())
                 .onErrorResume(e -> Mono.just(ResponseEntity.status(402).build()));
     }

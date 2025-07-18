@@ -28,15 +28,15 @@ public class ItemService {
         this.cartRepository = cartRepository;
     }
 
-    @Cacheable(value = "itemPages", key = "#search + '_' + #pageable")
-    public Mono<ItemPageDto> findByTitle(String search, Pageable pageable) {
+    @Cacheable(value = "itemPages", key = "#userId + '_' + #search + '_' + #pageable")
+    public Mono<ItemPageDto> findByTitle(Long userId, String search, Pageable pageable) {
         Mono<Long> totalCountMono = itemRepository.countByTitleContaining(search);
 
         Flux<ItemDto> itemDtoFlux = itemRepository.findByTitleContaining(search, pageable)
                 .concatMap(item -> {
                     ItemDto dto = ItemMapper.toItemDto(item);
                     dto.setCount(0);
-                    return cartRepository.findByItemIdAndOrderIdIsNull(item.getId())
+                    return cartRepository.findByItemIdAndUserIdAndOrderIdIsNull(item.getId(), userId)
                             .next()
                             .map(cart -> {
                                 dto.setCount(cart.getCount());
@@ -67,9 +67,9 @@ public class ItemService {
                 });
     }
 
-    @Cacheable(value = "carts", key = "'anonymousCart'")
-    public Flux<ItemDto> getCartItems() {
-        return cartRepository.findByOrderIdIsNull(Sort.by(Sort.Direction.ASC, "id"))
+    @Cacheable(value = "carts", key = "#userId")
+    public Flux<ItemDto> getCartItemsByUserId(Long userId) {
+        return cartRepository.findByUserIdAndOrderIdIsNull(userId, Sort.by(Sort.Direction.ASC, "id"))
                 .concatMap(cart ->
                         itemRepository.findById(cart.getItemId())
                                 .map(ItemMapper::toItemDto)
@@ -80,12 +80,12 @@ public class ItemService {
                 );
     }
 
-//    @Cacheable(value = "items", key = "#id")
-    public Mono<ItemDto> findByItemId(Long id) {
-        return itemRepository.findById(id)
+    @Cacheable(value = "items", key = "#itemId + '_' + #userId")
+    public Mono<ItemDto> findByItemIdAndUserId(Long itemId, Long userId) {
+        return itemRepository.findById(itemId)
                 .switchIfEmpty(Mono.error(new RuntimeException("Item not found")))
                 .flatMap(item ->
-                        cartRepository.findByItemIdAndOrderIdIsNull(item.getId())
+                        cartRepository.findByItemIdAndUserIdAndOrderIdIsNull(item.getId(), userId)
                                 .next()
                                 .defaultIfEmpty(new Cart())
                                 .map(cart -> {
