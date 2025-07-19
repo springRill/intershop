@@ -1,6 +1,8 @@
 package com.intershop.controller;
 
 import com.intershop.configuration.RouterConfiguration;
+import com.intershop.configuration.SecurityConfiguration;
+import com.intershop.repository.AppUserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
@@ -9,7 +11,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 @WebFluxTest(controllers = DefaultHandler.class)
-@Import(RouterConfiguration.class)
+@Import({RouterConfiguration.class, SecurityConfiguration.class})
 class DefaultHandlerTest {
 
     @MockitoBean
@@ -33,7 +35,9 @@ class DefaultHandlerTest {
     @Autowired
     private WebTestClient webTestClient;
 
-/*
+    @MockitoBean
+    private AppUserRepository repository;
+
     @Test
     void homePage() throws Exception {
         webTestClient.get().uri("/")
@@ -41,5 +45,4 @@ class DefaultHandlerTest {
                 .expectStatus().is3xxRedirection()
                 .expectHeader().valueEquals("Location", "/main/items");
     }
-*/
 }

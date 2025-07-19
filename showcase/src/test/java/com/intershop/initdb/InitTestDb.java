@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 @ActiveProfiles("test")
 public class InitTestDb {
 
+    protected Long userId = 1L;
     protected Long cartId = 2L;
     protected Long itemInCartId = 2L;
     protected Long orderId = 1L;

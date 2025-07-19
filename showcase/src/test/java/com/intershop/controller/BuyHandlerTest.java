@@ -1,23 +1,29 @@
 package com.intershop.controller;
 
+import com.intershop.configuration.CustomUserDetails;
 import com.intershop.configuration.RouterConfiguration;
+import com.intershop.configuration.SecurityConfiguration;
+import com.intershop.domain.AppUser;
+import com.intershop.repository.AppUserRepository;
 import com.intershop.service.BuyService;
 import com.intershop.service.ItemService;
 import com.intershop.service.PaymentApiService;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.security.test.web.reactive.server.SecurityMockServerConfigurers;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import static org.mockito.ArgumentMatchers.anyDouble;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
 @WebFluxTest(controllers = BuyHandler.class)
-@Import(RouterConfiguration.class)
+@Import({RouterConfiguration.class, SecurityConfiguration.class})
 class BuyHandlerTest {
 
     @MockitoBean
@@ -51,23 +57,33 @@ class BuyHandlerTest {
     @Autowired
     private WebTestClient webTestClient;
 
-/*
+    @MockitoBean
+    private AppUserRepository repository;
+
+    private static CustomUserDetails userDetails;
+
+    @BeforeAll
+    static void setupUser() {
+        userDetails = new CustomUserDetails(
+                new AppUser(1L, "test3", "password")
+        );
+    }
+
     @Test
     void buy() {
         Long orderId = 1L;
 
-        when(itemService.getCartItems()).thenReturn(Flux.empty()); // или с нужным набором товаров
+        when(itemService.getCartItemsByUserId(1L)).thenReturn(Flux.empty()); // или с нужным набором товаров
+        when(paymentApiService.pay(anyDouble(), anyLong())).thenReturn(Mono.empty());
+        when(buyService.buyCart(1L)).thenReturn(Mono.just(orderId));
 
-        when(paymentApiService.pay(anyDouble())).thenReturn(Mono.empty());
-
-        when(buyService.buyCart()).thenReturn(Mono.just(orderId));
-
-        webTestClient.post()
+        webTestClient
+                .mutateWith(SecurityMockServerConfigurers.mockUser(userDetails))
+                .post()
                 .uri("/buy")
                 .exchange()
                 .expectStatus().is3xxRedirection()
                 .expectHeader().valueEquals("Location", String.format("/orders/%d?newOrder=true", orderId));
 
     }
-*/
 }

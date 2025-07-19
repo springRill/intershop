@@ -23,7 +23,6 @@ class CartServiceTest extends InitTestDb {
     @MockitoBean
     private PaymentApiService paymentApiService;
 
-/*
     @Test
     void changeCartItem() {
 
@@ -31,26 +30,25 @@ class CartServiceTest extends InitTestDb {
                 .assertNext(cart -> assertEquals(2, cart.getCount()))
                 .verifyComplete();
 
-        StepVerifier.create(cartService.changeCartItem(itemInCartId, ItemActionEnum.PLUS))
+        StepVerifier.create(cartService.changeCartItem(itemInCartId, ItemActionEnum.PLUS, userId))
                 .verifyComplete();
 
         StepVerifier.create(cartRepository.findById(cartId))
                 .assertNext(cart -> assertEquals(3, cart.getCount()))
                 .verifyComplete();
 
-        StepVerifier.create(cartService.changeCartItem(itemInCartId, ItemActionEnum.MINUS))
+        StepVerifier.create(cartService.changeCartItem(itemInCartId, ItemActionEnum.MINUS, userId))
                 .verifyComplete();
 
         StepVerifier.create(cartRepository.findById(cartId))
                 .assertNext(cart -> assertEquals(2, cart.getCount()))
                 .verifyComplete();
 
-        StepVerifier.create(cartService.changeCartItem(itemInCartId, ItemActionEnum.DELETE))
+        StepVerifier.create(cartService.changeCartItem(itemInCartId, ItemActionEnum.DELETE, userId))
                 .verifyComplete();
 
         StepVerifier.create(cartRepository.findById(cartId))
                 .expectNextCount(0)
                 .verifyComplete();
     }
-*/
 }

@@ -1,12 +1,18 @@
 package com.intershop.controller;
 
+import com.intershop.configuration.CustomUserDetails;
 import com.intershop.configuration.RouterConfiguration;
+import com.intershop.configuration.SecurityConfiguration;
+import com.intershop.domain.AppUser;
 import com.intershop.dto.OrdersDto;
+import com.intershop.repository.AppUserRepository;
 import com.intershop.service.OrderService;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.security.test.web.reactive.server.SecurityMockServerConfigurers;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
@@ -19,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 @WebFluxTest(controllers = OrdersHandler.class)
-@Import(RouterConfiguration.class)
+@Import({RouterConfiguration.class, SecurityConfiguration.class})
 class OrdersHandlerTest {
 
     @MockitoBean
@@ -46,13 +52,26 @@ class OrdersHandlerTest {
     @Autowired
     private WebTestClient webTestClient;
 
-/*
+    @MockitoBean
+    private AppUserRepository repository;
+
+    private static CustomUserDetails userDetails;
+
+    @BeforeAll
+    static void setupUser() {
+        userDetails = new CustomUserDetails(
+                new AppUser(1L, "test3", "password")
+        );
+    }
+
     @Test
     void getOrders() {
         List<OrdersDto> mockOrders = List.of(new OrdersDto(), new OrdersDto());
-        when(orderService.getOrders()).thenReturn(Flux.fromIterable(mockOrders));
+        when(orderService.getOrders(1L)).thenReturn(Flux.fromIterable(mockOrders));
 
-        webTestClient.get()
+        webTestClient
+                .mutateWith(SecurityMockServerConfigurers.mockUser(userDetails))
+                .get()
                 .uri("/orders")
                 .exchange()
                 .expectStatus().isOk()
@@ -69,9 +88,11 @@ class OrdersHandlerTest {
         Long orderId = 1L;
 
         OrdersDto ordersDto = new OrdersDto();
-        when(orderService.getOrder(orderId)).thenReturn(Mono.just(ordersDto));
+        when(orderService.getOrder(orderId, 1L)).thenReturn(Mono.just(ordersDto));
 
-        webTestClient.get()
+        webTestClient
+                .mutateWith(SecurityMockServerConfigurers.mockUser(userDetails))
+                .get()
                 .uri(String.format("/orders/%d?newOrder=true", orderId))
                 .exchange()
                 .expectStatus().isOk()
@@ -82,6 +103,5 @@ class OrdersHandlerTest {
                     assertTrue(body.contains("order"));
                 });
     }
-*/
 
 }

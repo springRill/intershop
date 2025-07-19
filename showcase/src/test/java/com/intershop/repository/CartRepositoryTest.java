@@ -13,30 +13,28 @@ class CartRepositoryTest extends InitTestDb {
     @Autowired
     private CartRepository cartRepository;
 
-/*
     @Test
     void findByOrderIdIsNull() {
-        StepVerifier.create(cartRepository.findByOrderIdIsNull(Sort.by(Sort.Direction.ASC, "id")))
+        StepVerifier.create(cartRepository.findByUserIdAndOrderIdIsNull(userId, Sort.by(Sort.Direction.ASC, "id")))
                 .expectNextCount(1)
                 .verifyComplete();
     }
 
     @Test
     void findByItemIdAndOrderIdIsNull() {
-        StepVerifier.create(cartRepository.findByItemIdAndOrderIdIsNull(1L))
+        StepVerifier.create(cartRepository.findByItemIdAndUserIdAndOrderIdIsNull(1L, userId))
                 .expectNextCount(0)
                 .verifyComplete();
 
-        StepVerifier.create(cartRepository.findByItemIdAndOrderIdIsNull(2L))
+        StepVerifier.create(cartRepository.findByItemIdAndUserIdAndOrderIdIsNull(2L, userId))
                 .expectNextCount(1)
                 .verifyComplete();
     }
 
     @Test
     void findByOrderId() {
-        StepVerifier.create(cartRepository.findByOrderId(1L))
+        StepVerifier.create(cartRepository.findByOrderIdAndUserId(1L, userId))
                 .expectNextCount(1)
                 .verifyComplete();
     }
-*/
 }

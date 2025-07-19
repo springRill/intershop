@@ -20,36 +20,34 @@ class ItemServiceTest extends InitTestDb {
     @MockitoBean
     private PaymentApiService paymentApiService;
 
-/*
     @Test
     void findByTitle() {
         Pageable pageable = PageRequest.of(0, 10);
 
-        StepVerifier.create(itemService.findByTitle("item", pageable))
+        StepVerifier.create(itemService.findByTitle(userId, "item", pageable))
                 .assertNext(itemPageDto -> assertEquals(2, itemPageDto.getItemDtoList().size()))
                 .verifyComplete();
 
-        StepVerifier.create(itemService.findByTitle("item_1 title", pageable))
+        StepVerifier.create(itemService.findByTitle(userId, "item_1 title", pageable))
                 .assertNext(itemPageDto -> assertEquals(1, itemPageDto.getItemDtoList().size()))
                 .verifyComplete();
 
-        StepVerifier.create(itemService.findByTitle("item_2 title", pageable))
+        StepVerifier.create(itemService.findByTitle(userId, "item_2 title", pageable))
                 .assertNext(itemPageDto -> assertEquals(1, itemPageDto.getItemDtoList().size()))
                 .verifyComplete();
     }
 
     @Test
     void getCartItems() {
-        StepVerifier.create(itemService.getCartItems())
+        StepVerifier.create(itemService.getCartItemsByUserId(userId))
                 .expectNextCount(1)
                 .verifyComplete();
     }
 
     @Test
     void findByItemId() {
-        StepVerifier.create(itemService.findByItemId(itemInCartId))
+        StepVerifier.create(itemService.findByItemIdAndUserId(itemInCartId, userId))
                 .assertNext(itemDto -> assertEquals(2, itemDto.getCount()))
                 .verifyComplete();
     }
-*/
 }

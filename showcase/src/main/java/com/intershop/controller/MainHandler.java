@@ -5,7 +5,8 @@ import com.intershop.dto.ItemDto;
 import com.intershop.dto.ItemSortEnum;
 import com.intershop.service.CartService;
 import com.intershop.service.ItemService;
-import com.intershop.utils.AuthUtils;
+import com.intershop.utils.RenderUtils;
+import com.intershop.utils.UserUtils;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -40,7 +41,7 @@ public class MainHandler {
 
 
         Pageable pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.by(sort.getSortColumnName()).ascending());
-        return AuthUtils.getCurrentUserId(request)
+        return UserUtils.getCurrentUserId(request)
                 .flatMap(userId -> itemService.findByTitle(userId, search, pageable))
                 .flatMap(itemPageDto -> {
                     int colCount = 2;
@@ -56,7 +57,7 @@ public class MainHandler {
                         }
                     }
 
-                    return AuthUtils.render("main", Map.of(
+                    return RenderUtils.render("main", Map.of(
                             "items", itemsByRows,
                             "search", search,
                             "sort", sort.name(),
@@ -69,7 +70,7 @@ public class MainHandler {
     @PreAuthorize("isAuthenticated()")
     public Mono<ServerResponse> changeCartItem(ServerRequest request) {
         Long itemId = Long.valueOf(request.pathVariable("id"));
-        return AuthUtils.getCurrentUserId(request)
+        return UserUtils.getCurrentUserId(request)
                 .flatMap(userId -> {
                     return request.formData()
                             .map(data -> data.getFirst("action"))

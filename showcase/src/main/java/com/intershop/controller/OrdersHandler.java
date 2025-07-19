@@ -1,7 +1,8 @@
 package com.intershop.controller;
 
 import com.intershop.service.OrderService;
-import com.intershop.utils.AuthUtils;
+import com.intershop.utils.RenderUtils;
+import com.intershop.utils.UserUtils;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
@@ -21,11 +22,11 @@ public class OrdersHandler {
 
     @PreAuthorize("isAuthenticated()")
     public Mono<ServerResponse> getOrders(ServerRequest request) {
-        return AuthUtils.getCurrentUserId(request)
+        return UserUtils.getCurrentUserId(request)
                 .flatMap(userId -> {
                     return orderService.getOrders(userId)
                             .collectList()
-                            .flatMap(orders -> AuthUtils.render("orders", Map.of("orders", orders)));
+                            .flatMap(orders -> RenderUtils.render("orders", Map.of("orders", orders)));
                 });
     }
 
@@ -34,10 +35,10 @@ public class OrdersHandler {
         Long orgerId = Long.valueOf(request.pathVariable("id"));
         boolean newOrder = Boolean.parseBoolean(request.queryParam("newOrder").orElse("false"));
 
-        return AuthUtils.getCurrentUserId(request)
+        return UserUtils.getCurrentUserId(request)
                 .flatMap(userId -> {
                     return orderService.getOrder(orgerId, userId)
-                            .flatMap(order -> AuthUtils.render("order", Map.of(
+                            .flatMap(order -> RenderUtils.render("order", Map.of(
                                     "order", order,
                                     "newOrder", newOrder
                             )));

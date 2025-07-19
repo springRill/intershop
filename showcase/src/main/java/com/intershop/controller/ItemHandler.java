@@ -3,7 +3,8 @@ package com.intershop.controller;
 import com.intershop.dto.ItemActionEnum;
 import com.intershop.service.CartService;
 import com.intershop.service.ItemService;
-import com.intershop.utils.AuthUtils;
+import com.intershop.utils.RenderUtils;
+import com.intershop.utils.UserUtils;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
@@ -27,10 +28,10 @@ public class ItemHandler {
 
     public Mono<ServerResponse> getItems(ServerRequest request) {
         Long id = Long.valueOf(request.pathVariable("id"));
-        return AuthUtils.getCurrentUserId(request)
+        return UserUtils.getCurrentUserId(request)
                 .flatMap(userId -> {
                     return itemService.findByItemIdAndUserId(id, userId).flatMap(itemDto -> {
-                        return AuthUtils.render("item", Map.of(
+                        return RenderUtils.render("item", Map.of(
                                 "item", itemDto
                         ));
                     });
@@ -40,7 +41,7 @@ public class ItemHandler {
     @PreAuthorize("isAuthenticated()")
     public Mono<ServerResponse> changeCartItem(ServerRequest request) {
         Long id = Long.valueOf(request.pathVariable("id"));
-        return AuthUtils.getCurrentUserId(request)
+        return UserUtils.getCurrentUserId(request)
                 .flatMap(userId -> {
                     return request.formData()
                             .map(data -> data.getFirst("action"))

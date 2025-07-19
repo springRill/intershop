@@ -60,29 +60,27 @@ public class SecurityConfiguration {
 //                .httpBasic(Customizer.withDefaults())
                 .formLogin(Customizer.withDefaults())
                 .logout(logout -> logout
-                                .logoutSuccessHandler((webFilterExchange, authentication) ->
-                                        {
-                                            ServerWebExchange exchange = webFilterExchange.getExchange();
+                        .logoutSuccessHandler((webFilterExchange, authentication) ->
+                                {
+                                    ServerWebExchange exchange = webFilterExchange.getExchange();
 
-                                            return exchange.getSession()
-                                                    .flatMap(WebSession::invalidate)
-                                                    .then(Mono.fromRunnable(() -> {
-                                                        ResponseCookie deleteCookie = ResponseCookie.from("JSESSIONID", "")
-                                                                .path("/")
-                                                                .maxAge(0)
-                                                                .build();
-                                                        exchange.getResponse().addCookie(deleteCookie);
+                                    return exchange.getSession()
+                                            .flatMap(WebSession::invalidate)
+                                            .then(Mono.fromRunnable(() -> {
+                                                ResponseCookie deleteCookie = ResponseCookie.from("JSESSIONID", "")
+                                                        .path("/")
+                                                        .maxAge(0)
+                                                        .build();
+                                                exchange.getResponse().addCookie(deleteCookie);
 
-                                                        exchange.getResponse().setStatusCode(HttpStatus.SEE_OTHER);
-                                                        exchange.getResponse().getHeaders().setLocation(URI.create("/"));
-                                                    }));
+                                                exchange.getResponse().setStatusCode(HttpStatus.SEE_OTHER);
+                                                exchange.getResponse().getHeaders().setLocation(URI.create("/"));
+                                            }));
 
-                                        }
-                                )
+                                }
+                        )
                 )
                 .build();
-
-
     }
 
     @Bean

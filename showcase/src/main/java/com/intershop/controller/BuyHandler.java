@@ -3,7 +3,7 @@ package com.intershop.controller;
 import com.intershop.service.BuyService;
 import com.intershop.service.ItemService;
 import com.intershop.service.PaymentApiService;
-import com.intershop.utils.AuthUtils;
+import com.intershop.utils.UserUtils;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
@@ -30,7 +30,7 @@ public class BuyHandler {
 
     @PreAuthorize("isAuthenticated()")
     public Mono<ServerResponse> buy(ServerRequest request) {
-        return AuthUtils.getCurrentUserId(request).flatMap(userId -> {
+        return UserUtils.getCurrentUserId(request).flatMap(userId -> {
             return itemService.getCartItemsByUserId(userId)
                     .collectList()
                     .flatMap(itemDtoList -> {
@@ -51,5 +51,4 @@ public class BuyHandler {
                     });
         });
     }
-
 }

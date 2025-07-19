@@ -20,24 +20,22 @@ class OrderAndBuyServiceTest extends InitTestDb {
     @MockitoBean
     private PaymentApiService paymentApiService;
 
-/*
     @Test
     void buyAndOrder() {
-        StepVerifier.create(orderService.getOrders())
+        StepVerifier.create(orderService.getOrders(userId))
                 .expectNextCount(1)
                 .verifyComplete();
 
-        StepVerifier.create(orderService.getOrder(orderId))
+        StepVerifier.create(orderService.getOrder(orderId, userId))
                 .assertNext(Assertions::assertNotNull)
                 .verifyComplete();
 
-        StepVerifier.create(buyService.buyCart())
+        StepVerifier.create(buyService.buyCart(userId))
                 .expectNextCount(1)
                 .verifyComplete();
 
-        StepVerifier.create(orderService.getOrders())
+        StepVerifier.create(orderService.getOrders(userId))
                 .expectNextCount(2)
                 .verifyComplete();
     }
-*/
 }

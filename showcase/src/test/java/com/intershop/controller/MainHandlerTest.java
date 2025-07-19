@@ -1,12 +1,17 @@
 package com.intershop.controller;
 
+import com.intershop.configuration.CustomUserDetails;
 import com.intershop.configuration.RouterConfiguration;
+import com.intershop.configuration.SecurityConfiguration;
+import com.intershop.domain.AppUser;
 import com.intershop.dto.ItemActionEnum;
 import com.intershop.dto.ItemDto;
 import com.intershop.dto.ItemPageDto;
 import com.intershop.dto.PagingDto;
+import com.intershop.repository.AppUserRepository;
 import com.intershop.service.CartService;
 import com.intershop.service.ItemService;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
@@ -15,6 +20,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.web.reactive.server.SecurityMockServerConfigurers;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.BodyInserters;
@@ -26,7 +32,7 @@ import static org.mockito.Mockito.when;
 
 
 @WebFluxTest(controllers = MainHandler.class)
-@Import(RouterConfiguration.class)
+@Import({RouterConfiguration.class, SecurityConfiguration.class})
 class MainHandlerTest {
 
     @MockitoBean
@@ -56,7 +62,18 @@ class MainHandlerTest {
     @Autowired
     private WebTestClient webTestClient;
 
-/*
+    @MockitoBean
+    private AppUserRepository repository;
+
+    private static CustomUserDetails userDetails;
+
+    @BeforeAll
+    static void setupUser() {
+        userDetails = new CustomUserDetails(
+                new AppUser(1L, "test3", "password")
+        );
+    }
+
     @Test
     void getItems() throws Exception {
         ItemDto itemDto_1 = new ItemDto();
@@ -73,7 +90,7 @@ class MainHandlerTest {
         itemPageDto.setPagingDto(pagingDto);
 
         Pageable pageable = PageRequest.of(0, 10, Sort.by("id"));
-        when(itemService.findByTitle("", pageable)).thenReturn(Mono.just(itemPageDto));
+        when(itemService.findByTitle(-1L, "", pageable)).thenReturn(Mono.just(itemPageDto));
         webTestClient.get()
                 .uri(uriBuilder -> uriBuilder.path("/main/items")
                         .queryParam("search", "")
@@ -83,17 +100,17 @@ class MainHandlerTest {
                 .expectHeader().contentType(MediaType.TEXT_HTML)
                 .expectBody();
     }
-*/
 
 
-/*
     @Test
     void changeCartItem() {
         Long itemId = 1L;
         ItemActionEnum action = ItemActionEnum.PLUS;
 
-        when(cartService.changeCartItem(itemId, action)).thenReturn(Mono.empty());
-        webTestClient.post()
+        when(cartService.changeCartItem(itemId, action, 1L)).thenReturn(Mono.empty());
+        webTestClient
+                .mutateWith(SecurityMockServerConfigurers.mockUser(userDetails))
+                .post()
                 .uri("/main/items/{id}", itemId)  // без query параметров
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .body(BodyInserters.fromFormData("action", action.name()))
@@ -101,6 +118,5 @@ class MainHandlerTest {
                 .expectStatus().is3xxRedirection()
                 .expectHeader().valueMatches("Location", "/main/items");
     }
-*/
 
 }

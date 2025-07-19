@@ -31,41 +31,39 @@ public class RedisTest {
     @MockitoBean
     private PaymentApiService paymentApiService;
 
-/*
     @Test
     public void testFindByTitle() {
         Pageable pageable = PageRequest.of(0, 10);
 
-        ItemPageDto itemPageDto1 = itemService.findByTitle("item", pageable).block();
+        ItemPageDto itemPageDto1 = itemService.findByTitle(1L, "item", pageable).block();
         assertNotNull(itemPageDto1);
-        verify(itemService, times(1)).findByTitle("item", pageable);
+        verify(itemService, times(1)).findByTitle(1L, "item", pageable);
 
-        ItemPageDto itemPageDto2 = itemService.findByTitle("item", pageable).block();
+        ItemPageDto itemPageDto2 = itemService.findByTitle(1L, "item", pageable).block();
         assertNotNull(itemPageDto2);
-        verify(itemService, times(1)).findByTitle("item", pageable);
+        verify(itemService, times(1)).findByTitle(1L, "item", pageable);
 
     }
 
     @Test
     public void testGetCartItems() {
-        List<ItemDto> itemDtoList1 = itemService.getCartItems().collectList().block();
+        List<ItemDto> itemDtoList1 = itemService.getCartItemsByUserId(1L).collectList().block();
         assertNotNull(itemDtoList1);
-        verify(itemService, times(1)).getCartItems();
+        verify(itemService, times(1)).getCartItemsByUserId(1L);
 
-        List<ItemDto> itemDtoList2 = itemService.getCartItems().collectList().block();
+        List<ItemDto> itemDtoList2 = itemService.getCartItemsByUserId(1L).collectList().block();
         assertNotNull(itemDtoList2);
-        verify(itemService, times(1)).getCartItems();
+        verify(itemService, times(1)).getCartItemsByUserId(1L);
     }
 
     @Test
     public void testFindByItemId() {
-        ItemDto itemDto1 = itemService.findByItemId(1L).block();
+        ItemDto itemDto1 = itemService.findByItemIdAndUserId(1L, 1L).block();
         assertNotNull(itemDto1);
-        verify(itemService, times(1)).findByItemId(1L);
+        verify(itemService, times(1)).findByItemIdAndUserId(1L, 1L);
 
-        ItemDto itemDto2 = itemService.findByItemId(1L).block();
+        ItemDto itemDto2 = itemService.findByItemIdAndUserId(1L, 1L).block();
         assertNotNull(itemDto2);
-        verify(itemService, times(1)).findByItemId(1L);
+        verify(itemService, times(1)).findByItemIdAndUserId(1L, 1L);
     }
-*/
 }
