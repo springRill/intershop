@@ -28,18 +28,21 @@
 
 ### Запуск из среды разработки
 
+#### Генерация сервисов
+Выполнить `compile` в `maven` для генерации сервисов
+
 #### Запуск сервиса платежей
-Для запуска просто запускаем класс `IntershopApi` в модуле services
-Описание сервиса будет доступно по адресу `http://localhost:8081/swagger-ui/index.html`
+Для запуска просто запускаем класс `IntershopApi` в модуле services  
+Описание сервиса будет доступно по адресу http://localhost:8081/swagger-ui/index.html
 
 #### Запуск витрины
-Для запуска, сначала подниммаем redis в контейнере
-docker run --name redis-server -it --rm -p 6379:6379 redis:7.4.2-bookworm sh -c "redis-server & sleep 3 && redis-cli"
-Потом просто запускаем класс `IntershopReactiveApplication` в модуле showcase
-Приложение будет доступно по адресу `http://localhost:8080/`
+Для запуска, сначала поднимаем redis в контейнере `через redis/docker-compose.yml`  
+или через консоль `docker run --name redis-server -it --rm -p 6379:6379 redis:7.4.2-bookworm sh -c "redis-server & sleep 3 && redis-cli"`  
+Потом просто запускаем класс `IntershopReactiveApplication` в модуле showcase  
+Приложение будет доступно по адресу http://localhost:8080/
 
 ### Запуск средствами Docker Compose
 
 - Выполнить `package` в `maven`, для всего проекта чтобы собрались исполняемые файлы сервиса платежей, и витрины.
 - Запустить Docker Compose `docker-compose up --build`
-- После этого приложение будет доступно по адресу `http://localhost:8080/`, а описание сервисапо адресу `http://localhost:8081/swagger-ui/index.html`
+- После этого приложение будет доступно по адресу http://localhost:8080/, а описание сервисапо адресу `http://localhost:8081/swagger-ui/index.html`

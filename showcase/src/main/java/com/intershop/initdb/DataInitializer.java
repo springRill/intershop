@@ -49,11 +49,14 @@ public class DataInitializer implements CommandLineRunner {
 
         Path rootDir = Paths.get(itemsDirectory);
 
-        List<Path> sourceItemFolders = Files.list(rootDir)
-                .filter(Files::isDirectory)
-                .filter(path -> path.getFileName().toString().matches("\\d+"))
-                .sorted(Comparator.comparingInt((Path path) -> Integer.parseInt(path.getFileName().toString())))
-                .toList();
+        List<Path> sourceItemFolders;
+        try (Stream<Path> stream = Files.list(rootDir)) {
+            sourceItemFolders = stream
+                    .filter(Files::isDirectory)
+                    .filter(path -> path.getFileName().toString().matches("\\d+"))
+                    .sorted(Comparator.comparingInt((Path path) -> Integer.parseInt(path.getFileName().toString())))
+                    .toList();
+        }
 
         for(Path sourceItemPath: sourceItemFolders){
 
