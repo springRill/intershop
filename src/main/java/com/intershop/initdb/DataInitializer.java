@@ -36,19 +36,22 @@ public class DataInitializer implements CommandLineRunner {
     public void run(String... args) throws Exception {
         Path rootDir = Paths.get(itemsDirectory);
 
-        List<Path> sourceItemFolders = Files.list(rootDir)
-                .filter(Files::isDirectory)
-                .filter(path -> path.getFileName().toString().matches("\\d+"))
-                .sorted(Comparator.comparingInt((Path path) -> Integer.parseInt(path.getFileName().toString())))
-                .toList();
+        List<Path> sourceItemFolders;
+        try (Stream<Path> stream = Files.list(rootDir)) {
+            sourceItemFolders = stream
+                    .filter(Files::isDirectory)
+                    .filter(path -> path.getFileName().toString().matches("\\d+"))
+                    .sorted(Comparator.comparingInt((Path path) -> Integer.parseInt(path.getFileName().toString())))
+                    .toList();
+        }
 
-        for(Path sourceItemPath: sourceItemFolders){
+        for (Path sourceItemPath : sourceItemFolders) {
 
             Path sourceImagePath = getImagePath(sourceItemPath);
             Path targetImagePath = imageService.uploadItemImage(sourceImagePath);
 
             Path filePath = sourceItemPath.resolve("item.txt");
-            if (Files.exists(filePath)){
+            if (Files.exists(filePath)) {
                 List<String> lines = Files.readAllLines(filePath);
 
                 Item item = new Item();
