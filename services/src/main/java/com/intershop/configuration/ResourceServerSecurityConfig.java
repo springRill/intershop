@@ -20,6 +20,10 @@ public class ResourceServerSecurityConfig {
     SecurityWebFilterChain securityFilterChain(ServerHttpSecurity security) {
         return security
                 .authorizeExchange(requests -> requests
+                        // Открываем Swagger
+                        .pathMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
+                        .pathMatchers("/webjars/**").permitAll()
+                        // Остальные требуют авторизации
                         .anyExchange().authenticated()
                 )
                 .oauth2ResourceServer(serverSpec -> serverSpec
